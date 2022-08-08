@@ -70,4 +70,8 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.2.0'
 
     implementation "io.coil-kt:coil-compose:2.1.0"
+
+    //GIF SUPPORT
+    implementation("io.coil-kt:coil:2.1.0")
+    implementation("io.coil-kt:coil-gif:2.1.0")
 }
