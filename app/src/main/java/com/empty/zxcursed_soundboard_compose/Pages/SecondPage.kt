@@ -1,6 +1,7 @@
 package com.empty.zxcursed_soundboard_compose.Pages
 
 import android.media.MediaPlayer
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -83,16 +84,7 @@ fun Second(navigator: DestinationsNavigator) {
                     OutlinedButton(
                         onClick = {
 
-                            val Media2: MediaPlayer = MediaPlayer.create(context, R.raw.cursed2)
-                            val Media3: MediaPlayer = MediaPlayer.create(context, R.raw.cursed3)
-                            val Media4: MediaPlayer = MediaPlayer.create(context, R.raw.cursed4)
-                            val Media5: MediaPlayer = MediaPlayer.create(context, R.raw.cursed5)
-                            val Media6: MediaPlayer = MediaPlayer.create(context, R.raw.cursed6)
-                            val Media7: MediaPlayer = MediaPlayer.create(context, R.raw.cursed7)
-                            val Media8: MediaPlayer = MediaPlayer.create(context, R.raw.cursed8)
-                            val Media9: MediaPlayer = MediaPlayer.create(context, R.raw.cursed9)
-                            val Media10: MediaPlayer = MediaPlayer.create(context, R.raw.cursed10)
-                            val Media11: MediaPlayer = MediaPlayer.create(context, R.raw.cursed11)
+
                             val Media12: MediaPlayer = MediaPlayer.create(context, R.raw.cursed14)
                             val Media13: MediaPlayer = MediaPlayer.create(context, R.raw.cursed15)
                             val Media14: MediaPlayer = MediaPlayer.create(context, R.raw.cursed16)
@@ -111,16 +103,46 @@ fun Second(navigator: DestinationsNavigator) {
                                 0 -> {
                                     val Media2: MediaPlayer = MediaPlayer.create(context, R.raw.cursed2)
                                     Media2.start()
+                                    Log.d("TAG","cehck")
                                 }
-                                1 -> Media3.start()
-                                2 -> Media4.start()
-                                3 -> Media5.start()
-                                4 -> Media6.start()
-                                5 -> Media7.start()
-                                6 -> Media8.start()
-                                7 -> Media9.start()
-                                8 -> Media10.start()
-                                9 -> Media11.start()
+                                1 -> {
+                                    val Media3: MediaPlayer = MediaPlayer.create(context, R.raw.cursed3)
+                                    Media3.start()
+                                }
+                                2 -> {
+                                    val Media4: MediaPlayer = MediaPlayer.create(context, R.raw.cursed4)
+                                    Media4.start()
+                                }
+                                3 -> {
+                                    val Media5: MediaPlayer = MediaPlayer.create(context, R.raw.cursed5)
+                                    Media5.start()
+                                }
+                                4 -> {
+                                    val Media6: MediaPlayer = MediaPlayer.create(context, R.raw.cursed6)
+                                    Media6.start()
+                                }
+                                5 -> {
+                                    val Media7: MediaPlayer = MediaPlayer.create(context, R.raw.cursed7)
+                                    Media7.start()
+                                }
+                                6 -> {
+                                    val Media8: MediaPlayer = MediaPlayer.create(context, R.raw.cursed8)
+                                    Media8.start()
+                                }
+                                7 -> {
+                                    val Media9: MediaPlayer = MediaPlayer.create(context, R.raw.cursed9)
+                                    Media9.start()
+                                }
+                                8 -> {
+                                    val Media10: MediaPlayer = MediaPlayer.create(context, R.raw.cursed10)
+                                    Media10.start()
+                                }
+                                9 -> {
+                                    val Media11: MediaPlayer = MediaPlayer.create(context, R.raw.cursed11)
+                                    Media11.start()
+                                }
+
+
                                 10 -> Media12.start()
                                 11 -> Media13.start()
                                 12 -> Media14.start()
