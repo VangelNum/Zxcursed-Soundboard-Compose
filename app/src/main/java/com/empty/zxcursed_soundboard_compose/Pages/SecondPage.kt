@@ -82,6 +82,7 @@ fun Second(navigator: DestinationsNavigator) {
                 items(list.size) { index ->
                     OutlinedButton(
                         onClick = {
+
                             val Media2: MediaPlayer = MediaPlayer.create(context, R.raw.cursed2)
                             val Media3: MediaPlayer = MediaPlayer.create(context, R.raw.cursed3)
                             val Media4: MediaPlayer = MediaPlayer.create(context, R.raw.cursed4)
