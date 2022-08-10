@@ -108,6 +108,7 @@ fun Second(navigator: DestinationsNavigator) {
                                 1 -> {
                                     val Media3: MediaPlayer = MediaPlayer.create(context, R.raw.cursed3)
                                     Media3.start()
+
                                 }
 
                                 2 -> {
