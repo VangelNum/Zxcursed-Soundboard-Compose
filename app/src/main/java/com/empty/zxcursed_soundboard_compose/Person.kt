@@ -7,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,7 +19,6 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-import com.empty.zxcursed_soundboard_compose.Pages.First
 import com.empty.zxcursed_soundboard_compose.destinations.FirstDestination
 import com.empty.zxcursed_soundboard_compose.destinations.SecondDestination
 import com.ramcosta.composedestinations.annotation.Destination
@@ -28,7 +26,11 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @Destination
 @Composable
-fun Person(navigator: DestinationsNavigator) {
+fun Person(navigator: DestinationsNavigator,
+    color1: Color,
+    color2: Color,
+    color3: Color, color4: Color
+) {
     val context = LocalContext.current
         Row(
             modifier = Modifier
@@ -51,7 +53,7 @@ fun Person(navigator: DestinationsNavigator) {
                     .clip(CircleShape)
                     .weight(1f)
                     .aspectRatio(1f)
-                    .border(1.dp, Color.White, CircleShape)
+                    .border(1.dp, color1, CircleShape)
                     .clickable (onClick = { navigator.navigate(FirstDestination) }),
                 contentScale = ContentScale.Crop,
 
@@ -66,7 +68,7 @@ fun Person(navigator: DestinationsNavigator) {
                     .clip(CircleShape)
                     .weight(1f)
                     .aspectRatio(1f)
-                    .border(1.dp, Color.White, CircleShape)
+                    .border(1.dp, color2, CircleShape)
                     .clickable(onClick = {
                         navigator.navigate(SecondDestination)
                     }),
@@ -80,7 +82,7 @@ fun Person(navigator: DestinationsNavigator) {
                     .clip(CircleShape)
                     .weight(1f)
                     .aspectRatio(1f)
-                    .border(1.dp, Color.White, CircleShape),
+                    .border(1.dp, color3, CircleShape),
                 contentScale = ContentScale.Crop
 
             )
@@ -93,7 +95,7 @@ fun Person(navigator: DestinationsNavigator) {
                     .clip(CircleShape)
                     .weight(1f)
                     .aspectRatio(1f)
-                    .border(1.dp, Color.White, CircleShape),
+                    .border(1.dp, color4, CircleShape),
                 contentScale = ContentScale.Crop,
             )
             Spacer(modifier = Modifier.width(5.dp))
