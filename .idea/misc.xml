@@ -3,6 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/drawable/ic_baseline_download_24.xml" value="0.1815" />
+        <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.1815" />
+        <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/font/raleway_light.xml" value="0.221875" />
         <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/font/ubuntu_light.xml" value="0.14322916666666666" />
         <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/menu/popup_menu.xml" value="0.18385416666666668" />
       </map>
