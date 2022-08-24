@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -33,7 +34,7 @@ fun Person(
     navigator: DestinationsNavigator,
     color1: Color,
     color2: Color,
-    color3: Color, color4: Color, scope: CoroutineScope, scaffoldState: ScaffoldState,
+    color3: Color, color4: Color, scope: CoroutineScope, scaffoldState: ScaffoldState
 ) {
     val context = LocalContext.current
 
@@ -76,7 +77,21 @@ fun Person(
                 .aspectRatio(1f)
                 .border(1.dp, color2, CircleShape)
                 .clickable(onClick = {
-                    navigator.navigate(SecondDestination)
+//                    list = listOf(
+//                        context.getString(R.string.pivo),
+//                        context.getString(R.string.molchat),
+//                        context.getString(R.string.traxat),
+//                        context.getString(R.string.pikaper),
+//                        context.getString(R.string.sydalut),
+//                        context.getString(R.string.madmyazel),
+//                        context.getString(R.string.chtoetoblyat),
+//                        context.getString(R.string.spasibo),
+//                        context.getString(R.string.denegnet),
+//                        context.getString(R.string.minuspivo),
+//                        context.getString(R.string.anekdot),
+//                        context.getString(R.string.dirkavsire),
+//                    )
+                   // navigator.navigate(SecondDestination)
                 }),
             contentScale = ContentScale.Crop,
         )
