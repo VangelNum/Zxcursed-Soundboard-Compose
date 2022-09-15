@@ -82,6 +82,7 @@ fun First(navigator: DestinationsNavigator) {
     val fonts = FontFamily(Font(R.font.ubuntulight))
     val listState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
+
     var visible by remember { mutableStateOf(true) }
 
     var color1 by remember {
@@ -98,8 +99,7 @@ fun First(navigator: DestinationsNavigator) {
     }
 
     var list by remember {
-        mutableStateOf(listOf(
-            context.getString(R.string.uchimenyabistro),
+        mutableStateOf(listOf(context.getString(R.string.uchimenyabistro),
             context.getString(R.string.anekdotbryda),
             context.getString(R.string.nezachto),
             context.getString(R.string.menyaopyatybili),
@@ -141,7 +141,7 @@ fun First(navigator: DestinationsNavigator) {
         scaffoldState = scaffoldState,
         drawerBackgroundColor = Color.White,
         drawerContent = {
-            DrawerLayout(imageLoader)
+            DrawerLayout(imageLoader, navigator,context)
         }
     ) {
         it.calculateBottomPadding()

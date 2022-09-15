@@ -66,7 +66,6 @@ fun Second(navigator: DestinationsNavigator) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-
     Column(
         modifier = Modifier.background(Color.Black)
     ) {

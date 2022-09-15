@@ -1,29 +1,47 @@
 package com.empty.zxcursed_soundboard_compose
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.VideoView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
+import com.empty.zxcursed_soundboard_compose.destinations.ContactDestination
+import com.empty.zxcursed_soundboard_compose.destinations.VideoPlayerScreenDestination
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.source.ProgressiveMediaExtractor
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.ui.StyledPlayerView
+import com.google.android.exoplayer2.upstream.DefaultDataSource
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.util.Util
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.launch
 
 
 @Composable
-fun DrawerLayout(imageLoader: ImageLoader) {
+fun DrawerLayout(imageLoader: ImageLoader, navigator: DestinationsNavigator, context: Context) {
     Card(
         shape = CircleShape,
         elevation = 10.dp,
@@ -58,7 +76,7 @@ fun DrawerLayout(imageLoader: ImageLoader) {
             modifier = Modifier
                 .padding(25.dp, 25.dp, 25.dp, 0.dp)) {
             Row {
-                OutlinedButton(onClick = { /*TODO*/ },
+                OutlinedButton(onClick = { navigator.navigate(ContactDestination) },
                     shape = RoundedCornerShape(15.dp),
                     modifier = Modifier
                         .border(1.dp, Color.Black,
@@ -78,7 +96,16 @@ fun DrawerLayout(imageLoader: ImageLoader) {
 
             }
             Row {
-                OutlinedButton(onClick = { /*TODO*/ },
+                OutlinedButton(onClick = {
+                    val sendIntent: Intent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TITLE, "Спасибо за то, что поделился приложением! ❤")
+                        putExtra(Intent.EXTRA_TEXT,
+                            "ПРСОТО ЧТО ТО С ЧЕМ ТО ЭТО ЛУЧШЕЕ ЧТО Я ВИДЕЛ В СВОЕЙ ЖИЗНИ СТАвлю ЛАЙК Ю. НЕТ ТЫЩУ ЛАЙКОВ !!111?: https://play.google.com/store/apps/details?id=com.zxcursedsoundboard.apk")
+                        type = "text/plain"
+                    }
+                    context.startActivity(Intent.createChooser(sendIntent, "Share..."))
+                },
                     shape = RoundedCornerShape(15.dp),
                     modifier = Modifier
                         .border(1.dp, Color.Black,
@@ -98,7 +125,14 @@ fun DrawerLayout(imageLoader: ImageLoader) {
 
             }
             Row {
-                OutlinedButton(onClick = { /*TODO*/ },
+                OutlinedButton(onClick = {
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("market://details?id=com.zxcursedsoundboard.apk")
+                        )
+                    )
+                },
                     shape = RoundedCornerShape(15.dp),
                     modifier = Modifier
                         .border(1.dp, Color.Black,
@@ -109,7 +143,28 @@ fun DrawerLayout(imageLoader: ImageLoader) {
                     Image(painter = painterResource(id = R.drawable.ic_baseline_star_24),
                         contentDescription = "null"
                     )
-                    Text(text = "Оценить", modifier = Modifier
+                    Text(text = "Поставить 5 звезд", modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                        color = Color.White
+                    )
+                }
+            }
+            Row {
+                OutlinedButton(onClick = {
+                        navigator.navigate(VideoPlayerScreenDestination)
+                },
+                    shape = RoundedCornerShape(15.dp),
+                    modifier = Modifier
+                        .border(1.dp, Color.Black,
+                            RoundedCornerShape(15.dp)),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(
+                        0xB024231F))
+                ) {
+                    Image(painter = painterResource(id = R.drawable.ic_baseline_help_24),
+                        contentDescription = "null"
+                    )
+                    Text(text = "Не нажимай", modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp),
                         color = Color.White
@@ -120,3 +175,5 @@ fun DrawerLayout(imageLoader: ImageLoader) {
         }
     }
 }
+
+

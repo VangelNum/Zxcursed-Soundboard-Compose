@@ -3,10 +3,16 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/drawable-v24/ic_baseline_person_24.xml" value="0.175" />
         <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/drawable/ic_baseline_download_24.xml" value="0.1815" />
+        <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/drawable/ic_baseline_help_24.xml" value="0.2165" />
+        <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/drawable/ic_baseline_keyboard_double_arrow_up_24_white.xml" value="0.2165" />
+        <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/drawable/ic_baseline_message_24.xml" value="0.2165" />
         <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.1815" />
+        <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/drawable/ic_baseline_share_24.xml" value="0.2165" />
         <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/font/raleway_light.xml" value="0.221875" />
         <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/font/ubuntu_light.xml" value="0.14322916666666666" />
+        <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/layout/activity_for_video.xml" value="0.13958333333333334" />
         <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/menu/popup_menu.xml" value="0.18385416666666668" />
         <entry key="..\:/Users/vangel/ZxcursedSoundboardCompose/app/src/main/res/xml/file_paths.xml" value="0.2076923076923077" />
       </map>
