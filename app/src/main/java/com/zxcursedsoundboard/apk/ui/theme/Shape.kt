@@ -1,4 +1,4 @@
-package com.empty.zxcursed_soundboard_compose.ui.theme
+package com.zxcursedsoundboard.apk.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes

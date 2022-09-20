@@ -1,4 +1,4 @@
-package com.empty.zxcursed_soundboard_compose.ui.theme
+package com.zxcursedsoundboard.apk.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

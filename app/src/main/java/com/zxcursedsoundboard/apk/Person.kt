@@ -1,4 +1,4 @@
-package com.empty.zxcursed_soundboard_compose
+package com.zxcursedsoundboard.apk
 
 import android.os.Build
 import androidx.compose.foundation.Image
@@ -20,7 +20,7 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-import com.empty.zxcursed_soundboard_compose.destinations.FirstDestination
+import com.zxcursedsoundboard.apk.destinations.FirstDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.CoroutineScope

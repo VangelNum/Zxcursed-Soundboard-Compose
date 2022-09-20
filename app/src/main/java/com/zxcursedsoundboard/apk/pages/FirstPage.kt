@@ -1,4 +1,4 @@
-package com.empty.zxcursed_soundboard_compose.pages
+package com.zxcursedsoundboard.apk.pages
 
 import android.app.DownloadManager
 import android.content.Context
@@ -36,10 +36,12 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-import com.empty.zxcursed_soundboard_compose.DrawerLayout
-import com.empty.zxcursed_soundboard_compose.R
-import com.empty.zxcursed_soundboard_compose.lifecycle.LifeOfApplication
-import com.empty.zxcursed_soundboard_compose.tools.MyButton
+import com.zxcursedsoundboard.apk.DrawerLayout
+import com.zxcursedsoundboard.apk.R
+
+import com.zxcursedsoundboard.apk.lifecycle.LifeOfApplication
+import com.zxcursedsoundboard.apk.tools.MyButton
+
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay

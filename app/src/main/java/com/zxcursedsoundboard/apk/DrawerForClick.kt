@@ -1,4 +1,4 @@
-package com.empty.zxcursed_soundboard_compose
+package com.zxcursedsoundboard.apk
 
 import android.content.Context
 import android.content.Intent
@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
-import com.empty.zxcursed_soundboard_compose.destinations.ContactDestination
-import com.empty.zxcursed_soundboard_compose.destinations.VideoPlayerScreenDestination
+import com.zxcursedsoundboard.apk.destinations.ContactDestination
+import com.zxcursedsoundboard.apk.destinations.VideoPlayerScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 

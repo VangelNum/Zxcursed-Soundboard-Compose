@@ -22,11 +22,11 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.empty.zxcursed_soundboard_compose"
+        applicationId "com.zxcursedsoundboard.apk"
         minSdk 21
         targetSdk 32
-        versionCode 1
-        versionName "1.0"
+        versionCode 15
+        versionName "2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

@@ -1,7 +1,6 @@
-package com.empty.zxcursed_soundboard_compose.tools
+package com.zxcursedsoundboard.apk.tools
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.indication

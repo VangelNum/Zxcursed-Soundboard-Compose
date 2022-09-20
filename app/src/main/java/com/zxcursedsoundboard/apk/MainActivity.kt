@@ -1,11 +1,11 @@
-package com.empty.zxcursed_soundboard_compose
+package com.zxcursedsoundboard.apk
 
 import android.net.Uri
 import android.os.Bundle
 import android.widget.VideoView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.empty.zxcursed_soundboard_compose.ui.theme.ZxcursedSoundboardComposeTheme
+import com.zxcursedsoundboard.apk.ui.theme.ZxcursedSoundboardComposeTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
 
 class MainActivity : ComponentActivity() {

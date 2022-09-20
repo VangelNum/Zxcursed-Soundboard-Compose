@@ -1,4 +1,4 @@
-package com.empty.zxcursed_soundboard_compose.lifecycle
+package com.zxcursedsoundboard.apk.lifecycle
 
 import android.content.Context
 import android.util.Log
@@ -8,7 +8,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.empty.zxcursed_soundboard_compose.pages.musicStop
+import com.zxcursedsoundboard.apk.pages.musicStop
 
 @Composable
 fun LifeOfApplication(context: Context) {

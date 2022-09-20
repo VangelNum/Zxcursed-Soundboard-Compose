@@ -1,4 +1,4 @@
-package com.empty.zxcursed_soundboard_compose
+package com.zxcursedsoundboard.apk
 
 import org.junit.Test
 

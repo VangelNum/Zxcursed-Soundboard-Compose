@@ -1,4 +1,4 @@
-package com.empty.zxcursed_soundboard_compose
+package com.zxcursedsoundboard.apk
 
 import android.net.Uri
 import android.widget.VideoView
@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import com.empty.zxcursed_soundboard_compose.destinations.FirstDestination
+import com.zxcursedsoundboard.apk.destinations.FirstDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
