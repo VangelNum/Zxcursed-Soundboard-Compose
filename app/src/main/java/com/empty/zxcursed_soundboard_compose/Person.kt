@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -22,7 +21,6 @@ import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.empty.zxcursed_soundboard_compose.destinations.FirstDestination
-import com.empty.zxcursed_soundboard_compose.destinations.SecondDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +32,7 @@ fun Person(
     navigator: DestinationsNavigator,
     color1: Color,
     color2: Color,
-    color3: Color, color4: Color, scope: CoroutineScope, scaffoldState: ScaffoldState
+    color3: Color, color4: Color, scope: CoroutineScope, scaffoldState: ScaffoldState,
 ) {
     val context = LocalContext.current
 
@@ -91,7 +89,7 @@ fun Person(
 //                        context.getString(R.string.anekdot),
 //                        context.getString(R.string.dirkavsire),
 //                    )
-                   // navigator.navigate(SecondDestination)
+                    // navigator.navigate(SecondDestination)
                 }),
             contentScale = ContentScale.Crop,
         )

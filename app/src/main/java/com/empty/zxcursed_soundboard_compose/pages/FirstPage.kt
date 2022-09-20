@@ -7,12 +7,9 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -23,6 +20,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -69,13 +67,21 @@ private var media18: MediaPlayer? = null
 private var media19: MediaPlayer? = null
 private var media20: MediaPlayer? = null
 private var media21: MediaPlayer? = null
+private var media22: MediaPlayer? = null
+private var media23: MediaPlayer? = null
+private var media24: MediaPlayer? = null
+private var media25: MediaPlayer? = null
+private var media26: MediaPlayer? = null
+private var media27: MediaPlayer? = null
 
 
 @Destination(start = true)
 @Composable
 fun First(navigator: DestinationsNavigator) {
 
-    var currentPage = 1
+    var currentPage by remember {
+        mutableStateOf(1)
+    }
 
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
@@ -99,7 +105,8 @@ fun First(navigator: DestinationsNavigator) {
     }
 
     var list by remember {
-        mutableStateOf(listOf(context.getString(R.string.uchimenyabistro),
+        mutableStateOf(listOf(
+            context.getString(R.string.uchimenyabistro),
             context.getString(R.string.anekdotbryda),
             context.getString(R.string.nezachto),
             context.getString(R.string.menyaopyatybili),
@@ -141,7 +148,7 @@ fun First(navigator: DestinationsNavigator) {
         scaffoldState = scaffoldState,
         drawerBackgroundColor = Color.White,
         drawerContent = {
-            DrawerLayout(imageLoader, navigator,context)
+            DrawerLayout(imageLoader, navigator, context)
         }
     ) {
         it.calculateBottomPadding()
@@ -166,14 +173,15 @@ fun First(navigator: DestinationsNavigator) {
                         .aspectRatio(1f)
                         .border(1.dp, color1, CircleShape)
                         .clickable(onClick = {
+                            currentPage = 1
                             rememberDrawable = R.drawable.photo13
                             color1 = Color.Green
                             color2 = Color.White
                             color3 = Color.White
                             color4 = Color.White
                             musicStop()
-                            currentPage = 1
                             coroutineScope.launch {
+                                listState.animateScrollToItem(index = 0)
                                 visible = !visible
                                 delay(500L)
                                 visible = !visible
@@ -224,6 +232,7 @@ fun First(navigator: DestinationsNavigator) {
                             currentPage = 2
                             musicStop()
                             coroutineScope.launch {
+                                listState.animateScrollToItem(index = 0)
                                 visible = !visible
                                 delay(500L)
                                 visible = !visible
@@ -249,7 +258,13 @@ fun First(navigator: DestinationsNavigator) {
                                     context.getString(R.string.onrad),
                                     context.getString(R.string.worstsf),
                                     context.getString(R.string.fivestar),
-                                    context.getString(R.string.dumaldendi)
+                                    context.getString(R.string.dumaldendi),
+                                    context.getString(R.string.boje),
+                                    context.getString(R.string.osujdau),
+                                    context.getString(R.string.ofau),
+                                    context.getString(R.string.zerozriteley),
+                                    context.getString(R.string.zavaliebalo),
+                                    context.getString(R.string.razban)
                                 )
                             }
 
@@ -271,9 +286,10 @@ fun First(navigator: DestinationsNavigator) {
                             color2 = Color.White
                             color3 = Color.Green
                             color4 = Color.White
-                            currentPage = 3
                             musicStop()
                             coroutineScope.launch {
+                                currentPage = 3
+                                listState.animateScrollToItem(index = 0)
                                 visible = !visible
                                 delay(500L)
                                 visible = !visible
@@ -320,6 +336,7 @@ fun First(navigator: DestinationsNavigator) {
                             currentPage = 4
                             musicStop()
                             coroutineScope.launch {
+                                listState.animateScrollToItem(index = 0)
                                 visible = !visible
                                 delay(500L)
                                 visible = !visible
@@ -334,7 +351,12 @@ fun First(navigator: DestinationsNavigator) {
                                     context.getString(R.string.online),
                                     context.getString(R.string.simpledimple),
                                     context.getString(R.string.femlove),
-                                    context.getString(R.string.in_my_mind)
+                                    context.getString(R.string.in_my_mind),
+                                    context.getString(R.string.bankai),
+                                    context.getString(R.string.killua),
+                                    context.getString(R.string.neverenough),
+                                    context.getString(R.string.quinque),
+                                    context.getString(R.string.fxckoff),
                                 )
                             }
                         },
@@ -342,7 +364,7 @@ fun First(navigator: DestinationsNavigator) {
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Image(
-                    painter = painterResource(id = R.drawable.photo22),
+                    painter = painterResource(id = R.drawable.ic_baseline_dehaze_24),
                     contentDescription = null,
                     modifier = Modifier
                         .clip(CircleShape)
@@ -367,12 +389,13 @@ fun First(navigator: DestinationsNavigator) {
                 Image(painter = painterResource(id = rememberDrawable),
                     contentDescription = null,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(25.dp, 25.dp, 0.dp, 0.dp)).fillMaxSize(),
+                        .clip(RoundedCornerShape(25.dp, 25.dp, 0.dp, 0.dp))
+                        .fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
                 androidx.compose.animation.AnimatedVisibility(visible = visible,
                     enter = slideInHorizontally(),
-                    exit = fadeOut()) {
+                    exit = shrinkHorizontally()) {
                     LazyVerticalGrid(columns = GridCells.Fixed(2),
                         state = listState,
                         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -429,14 +452,14 @@ fun First(navigator: DestinationsNavigator) {
                                     onLongClick = {
                                         expanded = true
                                     },
-                                    colors = ButtonDefaults.buttonColors(Color(0xDA000000)),
-                                    shape = RoundedCornerShape(15.dp),
+                                    border = BorderStroke(1.dp, Color.Gray),
                                     modifier = Modifier
                                         .height(80.dp)
                                         .fillMaxWidth()
-                                        .border(1.dp,
-                                            Color(0x79D6C9C9),
-                                            RoundedCornerShape(15.dp)),
+                                        .alpha(0.9f),
+                                    shape = RoundedCornerShape(25),
+                                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(
+                                        0xFF0A0A0A)),
                                     onClick = {
                                         if (thumbIconLiked) {
                                             when (index) {
@@ -687,6 +710,10 @@ fun First(navigator: DestinationsNavigator) {
                                                             media11 = MediaPlayer.create(context,
                                                                 R.raw.cursed29)
                                                         }
+                                                        if (currentPage == 4) {
+                                                            media11 = MediaPlayer.create(context,
+                                                                R.raw.zxcursed70)
+                                                        }
                                                     }
                                                     media11?.start()
                                                 }
@@ -703,6 +730,10 @@ fun First(navigator: DestinationsNavigator) {
                                                         if (currentPage == 3) {
                                                             media12 = MediaPlayer.create(context,
                                                                 R.raw.cursed30)
+                                                        }
+                                                        if (currentPage == 4) {
+                                                            media12 = MediaPlayer.create(context,
+                                                                R.raw.zxcursed72)
                                                         }
                                                     }
                                                     media12?.start()
@@ -721,6 +752,10 @@ fun First(navigator: DestinationsNavigator) {
                                                             media13 = MediaPlayer.create(context,
                                                                 R.raw.cursed31)
                                                         }
+                                                        if (currentPage == 4) {
+                                                            media13 = MediaPlayer.create(context,
+                                                                R.raw.zxcursed73)
+                                                        }
                                                     }
                                                     media13?.start()
                                                 }
@@ -738,6 +773,10 @@ fun First(navigator: DestinationsNavigator) {
                                                             media14 = MediaPlayer.create(context,
                                                                 R.raw.cursed32)
                                                         }
+                                                        if (currentPage == 4) {
+                                                            media14 = MediaPlayer.create(context,
+                                                                R.raw.zxcursed74)
+                                                        }
                                                     }
                                                     media14?.start()
                                                 }
@@ -754,6 +793,10 @@ fun First(navigator: DestinationsNavigator) {
                                                         if (currentPage == 3) {
                                                             media15 = MediaPlayer.create(context,
                                                                 R.raw.cursed33)
+                                                        }
+                                                        if (currentPage == 4) {
+                                                            media15 = MediaPlayer.create(context,
+                                                                R.raw.zxcursed71)
                                                         }
                                                     }
                                                     media15?.start()
@@ -824,7 +867,60 @@ fun First(navigator: DestinationsNavigator) {
                                                     }
                                                     media21?.start()
                                                 }
-
+                                                22 -> {  // да какого хуя
+                                                    if (media22 == null) {
+                                                        if (currentPage == 2) {
+                                                            media22 = MediaPlayer.create(context,
+                                                                R.raw.cursed76)
+                                                        }
+                                                    }
+                                                    media22?.start()
+                                                }
+                                                23 -> { //осуждаю
+                                                    if (media23 == null) {
+                                                        if (currentPage == 2) {
+                                                            media23 = MediaPlayer.create(context,
+                                                                R.raw.cursed77)
+                                                        }
+                                                    }
+                                                    media23?.start()
+                                                }
+                                                24 -> { //офаю
+                                                    if (media24 == null) {
+                                                        if (currentPage == 2) {
+                                                            media24 = MediaPlayer.create(context,
+                                                                R.raw.cursed78)
+                                                        }
+                                                    }
+                                                    media24?.start()
+                                                }
+                                                25 -> { //офаю
+                                                    if (media25 == null) {
+                                                        if (currentPage == 2) {
+                                                            media25 = MediaPlayer.create(context,
+                                                                R.raw.cursed79)
+                                                        }
+                                                    }
+                                                    media25?.start()
+                                                }
+                                                26 -> { //0 зрителей
+                                                    if (media26 == null) {
+                                                        if (currentPage == 2) {
+                                                            media26 = MediaPlayer.create(context,
+                                                                R.raw.cursed80)
+                                                        }
+                                                    }
+                                                    media26?.start()
+                                                }
+                                                27 -> { //завали ебало
+                                                    if (media27 == null) {
+                                                        if (currentPage == 2) {
+                                                            media27 = MediaPlayer.create(context,
+                                                                R.raw.cursed81)
+                                                        }
+                                                    }
+                                                    media27?.start()
+                                                }
                                             }
                                         }
 
@@ -1053,6 +1149,43 @@ fun musicStop() {
         media21?.release()
         media21 = null
     }
+    if (media22?.isPlaying == true || media22 != null) {
+        media22?.stop()
+        media22?.reset()
+        media22?.release()
+        media22 = null
+    }
+    if (media23?.isPlaying == true || media23 != null) {
+        media23?.stop()
+        media23?.reset()
+        media23?.release()
+        media23 = null
+    }
+    if (media24?.isPlaying == true || media24 != null) {
+        media24?.stop()
+        media24?.reset()
+        media24?.release()
+        media24 = null
+    }
+    if (media25?.isPlaying == true || media25 != null) {
+        media25?.stop()
+        media25?.reset()
+        media25?.release()
+        media25 = null
+    }
+    if (media26?.isPlaying == true || media26 != null) {
+        media26?.stop()
+        media26?.reset()
+        media26?.release()
+        media26 = null
+    }
+    if (media27?.isPlaying == true || media27 != null) {
+        media27?.stop()
+        media27?.reset()
+        media27?.release()
+        media27 = null
+    }
+
 }
 
 private fun download(index: Int, context: Context, currentPage: Int) {
@@ -1132,6 +1265,262 @@ private fun download(index: Int, context: Context, currentPage: Int) {
                     "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/TenBqnBGgedxyA" //шмотки
             }
 
+        }
+    }
+    if (currentPage == 2) {
+        when (index) {
+            0 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/1lYhaW-rrnroeA"
+            }
+            1 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/WC5Ax2n_7IhXHw"
+            }
+            2 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/9lhUu6VHkw-XtA"
+            }
+            3 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/gy-O4dXFpXhpCw"
+            }
+            4 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/990tsnu-jYPCDw"
+            }
+            5 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/jb1zwCOQdviGSQ"
+            }
+            6 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/jlKJdK_UNs9U4w"
+            }
+            7 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/N3hz-J4A1zoQCQ"
+            }
+            8 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/FjHszVTHslnftg"
+            }
+            9 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/cXIrWJPxNDQ2tg"
+            }
+            10 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/sHICBg02SBdSMw"
+            }
+            11 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/UhWg8nuwNb0b6Q"
+            }
+            12 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/one1yK07x_ODhw"
+            }
+            13 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/tDs8oVb3iENTww"
+            }
+            14 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/8MU6ax_xAsopjQ"
+            }
+            15 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/y-IhIFdtDqhUCQ"
+            }
+            16 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/7miNN3B8nQWLzw"
+            }
+            17 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/NAP0uU6dNOBIrw"
+            }
+            18 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/zDKJmh2xZXmNRA"
+            }
+            19 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/YQMfEUTY4g406g"
+            }
+            20 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/PRvpvob4obuVkQ"
+            }
+            21 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/VX4T-qOTVuAzUw"
+            }
+            22 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/HZnIyc8OLry4UQ"
+            }
+            23 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/EqlMzTWmjM3hOg"
+            }
+            24 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/AjMzxJ9eC207GQ"
+            }
+            25 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/7axeoTxc69xnPQ"
+            }
+            26 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/EhhILYDkGhD1cQ"
+            }
+            27 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/idl9f1ngQT5iQA"
+            }
+        }
+    }
+    if (currentPage == 3) {
+        when (index) {
+            0 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/tegFWnGJ7vPT2w"
+            }
+            1 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/vXDPdrKzMT9ilw"
+            }
+            2 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/vKVGgzj0JCG2gg"
+            }
+            3 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/go7QLV-k7S3VkA"
+            }
+            4 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/NqMTIQCl8bjG7A"
+            }
+            5 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/60sO7feCjtM-EA"
+            }
+            6 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/SzYQoNOFdpoLkg"
+            }
+            7 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/RcVz3JRHmzt_ew"
+            }
+            8 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/MBnzwLtgLt1Y8w"
+            }
+            9 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/dmiEP6OGaDQV2w"
+            }
+            10 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/V1HyBjpEhzf_vg"
+            }
+            11 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/6-tfOZPQuCX60Q"
+            }
+            12 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/oBjCCP32lo4chg"
+            }
+            13 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/QtLm1WJX7g1whA"
+            }
+            14 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/j4AeNwo01-G9gQ"
+            }
+            15 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/eaLnatA_boVIJw"
+            }
+            16 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/juj3v705e2iZ-Q"
+            }
+        }
+    }
+    if (currentPage == 4) {
+        when (index) {
+            0 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/B4vX2zYKr2Wffw"
+            }
+            1 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/uKCn2C4y6gp3ug"
+            }
+            2 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/RBp-yWs-IDKWLQ"
+            }
+            3 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/_wJ1xDvN-hNJwA"
+            }
+            4 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/k6FR6bBGlaFwIQ"
+            }
+            5 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/X1Kl4wgZ2GKW5A"
+            }
+            6 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/B3ktHaLusbKFhw"
+            }
+            7 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/P4WrRT7lC-0_xA"
+            }
+            8 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/4uzESrHti_rCUw"
+            }
+            9 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/60sFXr5P-NrzYQ"
+            }
+            10 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/s6CJG8Ixs_QEUg"
+            }
+            11 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/fTwiF1ab46R_QQ"
+            }
+            12 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/HLaFF0QXKSjoRw"
+            }
+            13 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/YM2HyGZ7-qDP_g"
+            }
+            14 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/diz5x-Jk0TKFNA"
+            }
+            15 -> {
+                url =
+                    "https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/2OAHqikayl3sIA"
+            }
         }
     }
     val request = DownloadManager.Request(Uri.parse(url))

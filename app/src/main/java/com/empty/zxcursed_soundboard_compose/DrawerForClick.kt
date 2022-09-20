@@ -3,41 +3,29 @@ package com.empty.zxcursed_soundboard_compose
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.VideoView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import com.empty.zxcursed_soundboard_compose.destinations.ContactDestination
 import com.empty.zxcursed_soundboard_compose.destinations.VideoPlayerScreenDestination
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.source.ProgressiveMediaExtractor
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.ui.StyledPlayerView
-import com.google.android.exoplayer2.upstream.DefaultDataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -152,7 +140,7 @@ fun DrawerLayout(imageLoader: ImageLoader, navigator: DestinationsNavigator, con
             }
             Row {
                 OutlinedButton(onClick = {
-                        navigator.navigate(VideoPlayerScreenDestination)
+                    navigator.navigate(VideoPlayerScreenDestination)
                 },
                     shape = RoundedCornerShape(15.dp),
                     modifier = Modifier

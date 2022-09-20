@@ -4,9 +4,9 @@
     <string name="check3">"<u>VANGELNUM@GMAIL.COM</u>"</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
-    <string name="check5">"Все звуки были взяты со стримов моего любимого ютуб и тикток стримера"</string>
-    <string name="check6">"<u>TWITCH.TV/ZXCURSED</u>"</string>
-    <string name="check7">"<u>TIKTOK.COM/@CONVULSIVE_SEIZURES</u>"</string>
+    <string name="check5">"Все звуки были взяты у моего любимого дота репера"</string>
+    <string name="check6">"<u>YOUTUBE.COM/ZXCURSED</u>"</string>
+    <string name="check7">"<u>T.ME/ZXCURSED</u>"</string>
     <string name="check">"При возникновении ошибки, по предложениям доработки приложения, если не можете жить без какой-либо фразы"</string>
     <string name="pivo">Пивка бахнул</string>
     <string name="molchat">Всем молчать</string>
@@ -75,6 +75,19 @@
     <string name="online">Анекдот про онлайн</string>
     <string name="simpledimple">симпл димпл</string>
     <string name="femlove">фотографирую закат</string>
+    <string name="bankai">bankai</string>
+    <string name="killua">killua</string>
+    <string name="neverenough">never enough</string>
+    <string name="quinque">quinque</string>
+    <string name="fxckoff">fxck off</string>
     <string name="in_my_mind">in my mind</string>
     <string name="download">Скачать</string>
+
+    <string name="boje">Да какого хуя</string>
+    <string name="osujdau">Осуждаю</string>
+    <string name="ofau">Офаю</string>
+    <string name="zerozriteley">0 зрителей</string>
+    <string name="zavaliebalo">Завали ебало</string>
+    <string name="razban">Скоро разбанят</string>
+
 </resources>
