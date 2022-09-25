@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Zxcursed-Soundboard-Compose</string>
+    <string name="app_name">Zxcursed Soundboard</string>
     <string name="check2">"<u>VK.COM/VANGELNUM</u>"</string>
     <string name="check3">"<u>VANGELNUM@GMAIL.COM</u>"</string>
     <string name="open">Open</string>
@@ -14,7 +14,7 @@
     <string name="pikaper">пикапер</string>
     <string name="sydalut">сюда лут</string>
     <string name="madmyazel">мадмуазель</string>
-    <string name="chtoetoblyat">что это блять</string>
+    <string name="chtoetoblyat">что это</string>
     <string name="spasibo">спасибо</string>
     <string name="denegnet">денег нет</string>
     <string name="minuspivo">минус пиво</string>
