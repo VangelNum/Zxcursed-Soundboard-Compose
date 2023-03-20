@@ -1,4 +1,4 @@
-package com.zxcursedsoundboard.apk
+package com.zxcursedsoundboard.apk.core.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -20,11 +20,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.zxcursedsoundboard.feature_favourite.presentation.FavouriteScreen
+import com.zxcursedsoundboard.apk.ZxcursedSoundScreen
+import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteScreen
+import com.zxcursedsoundboard.apk.feature_main.presentation.ZxcursedMainScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -38,22 +41,19 @@ fun Navigation(
     val scope = rememberCoroutineScope()
 
     val itemsScreens = listOf(
-        "Курсед",
-        "Песни курседа",
-        "Улиточка",
-        "Акума",
-        "Флай",
-        "Избранное"
+        Screens.MainScreen,
+        Screens.SoundScreen,
+        Screens.FavouriteScreen
     )
-
-
 
     BackdropScaffold(
         backLayerBackgroundColor = MaterialTheme.colors.background,
         scaffoldState = scaffoldState,
         appBar = {
             TopAppBar(
-                title = { Text("Zxcursed Soundboard") },
+                title = {
+
+                },
                 navigationIcon = {
                     if (scaffoldState.isConcealed) {
                         IconButton(
@@ -84,19 +84,15 @@ fun Navigation(
             )
         },
         backLayerContent = {
-            itemsScreens.forEachIndexed { index, route ->
+            itemsScreens.forEach {
                 Column {
-                    ListItem(text = { Text(text = route) }, modifier = Modifier.clickable {
-                        when(index) {
-                            0-> {
-                                navController.navigate(Screens.MainScreen.route)
+                    ListItem(text = { Text(text = it.nameScreen) }, modifier = Modifier.clickable {
+                        navController.navigate(it.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
                             }
-                            1-> {
-                                navController.navigate(Screens.SoundScreen.route)
-                            }
-                            5-> {
-                                navController.navigate(Screens.FavouriteScreen.route)
-                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
                     })
                 }

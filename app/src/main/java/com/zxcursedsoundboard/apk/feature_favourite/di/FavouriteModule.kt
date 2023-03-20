@@ -1,9 +1,9 @@
-package com.zxcursedsoundboard.feature_favourite.di
+package com.zxcursedsoundboard.apk.feature_favourite.di
 
 import android.content.Context
 import androidx.room.Room
-import com.zxcursedsoundboard.feature_favourite.data.network.FavouriteDao
-import com.zxcursedsoundboard.feature_favourite.data.network.FavouriteDatabase
+import com.zxcursedsoundboard.apk.feature_favourite.data.network.FavouriteDao
+import com.zxcursedsoundboard.apk.feature_favourite.data.network.FavouriteDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

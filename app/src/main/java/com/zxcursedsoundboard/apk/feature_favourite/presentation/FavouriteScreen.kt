@@ -1,4 +1,4 @@
-package com.zxcursedsoundboard.feature_favourite.presentation
+package com.zxcursedsoundboard.apk.feature_favourite.presentation
 
 import android.media.MediaPlayer
 import androidx.compose.foundation.layout.Box
@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zxcursedsoundboard.apk.core.common.Resource
-import com.zxcursedsoundboard.feature_favourite.data.model.FavouriteEntity
+import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 
 @Composable
 fun FavouriteScreen(

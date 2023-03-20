@@ -1,13 +1,15 @@
-package com.zxcursedsoundboard.feature_favourite.presentation
+package com.zxcursedsoundboard.apk.feature_favourite.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zxcursedsoundboard.apk.core.common.Resource
-import com.zxcursedsoundboard.feature_favourite.data.model.FavouriteEntity
-import com.zxcursedsoundboard.feature_favourite.domain.repository.FavouriteRepository
+import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
+import com.zxcursedsoundboard.apk.feature_favourite.domain.repository.FavouriteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,11 +27,9 @@ class FavouriteViewModel @Inject constructor(
     }
 
     private fun getAllFavouriteSongs() {
-        viewModelScope.launch {
-            repository.getAllSongs().collect { res->
-                _favouriteState.value = res
-            }
-        }
+        repository.getAllSongs().onEach { res->
+            _favouriteState.value = res
+        }.launchIn(viewModelScope)
     }
 
     fun addSong(song: FavouriteEntity) {

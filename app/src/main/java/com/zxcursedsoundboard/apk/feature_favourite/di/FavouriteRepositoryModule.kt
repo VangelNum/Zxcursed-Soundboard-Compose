@@ -1,7 +1,7 @@
-package com.zxcursedsoundboard.feature_favourite.di
+package com.zxcursedsoundboard.apk.feature_favourite.di
 
-import com.zxcursedsoundboard.feature_favourite.data.FavouriteRepositoryImpl
-import com.zxcursedsoundboard.feature_favourite.domain.repository.FavouriteRepository
+import com.zxcursedsoundboard.apk.feature_favourite.data.repository.FavouriteRepositoryImpl
+import com.zxcursedsoundboard.apk.feature_favourite.domain.repository.FavouriteRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

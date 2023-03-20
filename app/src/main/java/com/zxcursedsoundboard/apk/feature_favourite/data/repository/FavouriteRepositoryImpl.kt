@@ -1,9 +1,9 @@
-package com.zxcursedsoundboard.feature_favourite.data
+package com.zxcursedsoundboard.apk.feature_favourite.data.repository
 
 import com.zxcursedsoundboard.apk.core.common.Resource
-import com.zxcursedsoundboard.feature_favourite.data.model.FavouriteEntity
-import com.zxcursedsoundboard.feature_favourite.data.network.FavouriteDao
-import com.zxcursedsoundboard.feature_favourite.domain.repository.FavouriteRepository
+import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
+import com.zxcursedsoundboard.apk.feature_favourite.data.network.FavouriteDao
+import com.zxcursedsoundboard.apk.feature_favourite.domain.repository.FavouriteRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -18,6 +18,7 @@ class FavouriteRepositoryImpl @Inject constructor(
             response.collect {
                 emit(Resource.Success(it))
             }
+
         } catch (e: Exception) {
             emit(Resource.Error(e.message.toString()))
         }

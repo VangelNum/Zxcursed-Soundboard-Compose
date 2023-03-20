@@ -1,11 +1,11 @@
-package com.zxcursedsoundboard.feature_favourite.data.network
+package com.zxcursedsoundboard.apk.feature_favourite.data.network
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.IGNORE
 import androidx.room.Query
-import com.zxcursedsoundboard.feature_favourite.data.model.FavouriteEntity
+import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

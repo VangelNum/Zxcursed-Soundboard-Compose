@@ -1,4 +1,4 @@
-package com.zxcursedsoundboard.feature_favourite.data.model
+package com.zxcursedsoundboard.apk.feature_favourite.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
