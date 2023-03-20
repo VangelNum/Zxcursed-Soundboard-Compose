@@ -17,63 +17,63 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 
 
-@Composable
-fun MyButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    onLongClick: () -> Unit = {},
-    enabled: Boolean = true,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    elevation: ButtonElevation? = ButtonDefaults.elevation(),
-    shape: Shape = MaterialTheme.shapes.small,
-    border: BorderStroke? = null,
-    colors: ButtonColors = ButtonDefaults.buttonColors(),
-    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
-    content: @Composable RowScope.() -> Unit
-) {
-    val contentColor by colors.contentColor(enabled)
-    var tapped by remember { mutableStateOf(false) }
-    Surface(
-        modifier = modifier
-            .clip(shape)
-            .indication(interactionSource, LocalIndication.current)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = { offset ->
-                        tapped = true
-                        val press = PressInteraction.Press(offset)
-                        interactionSource.emit(press)
-                        tryAwaitRelease()
-                        interactionSource.emit(PressInteraction.Release(press))
-                        tapped = false
-                    },
-                    onTap = { onClick() },
-                    onLongPress = { onLongClick() }
-                )
-            }
-        ,
-        shape = shape,
-        color = colors.backgroundColor(enabled).value,
-        contentColor = contentColor.copy(alpha = 1f),
-        border = border,
-        elevation = elevation?.elevation(enabled, interactionSource)?.value ?: 0.dp,
-    ) {
-        CompositionLocalProvider(LocalContentAlpha provides contentColor.alpha) {
-            ProvideTextStyle(
-                value = MaterialTheme.typography.button
-            ) {
-                Row(
-                    Modifier
-                        .defaultMinSize(
-                            minWidth = ButtonDefaults.MinWidth,
-                            minHeight = ButtonDefaults.MinHeight
-                        )
-                        .padding(contentPadding),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    content = content
-                )
-            }
-        }
-    }
-}
+//@Composable
+//fun MyButton(
+//    onClick: () -> Unit,
+//    modifier: Modifier = Modifier,
+//    onLongClick: () -> Unit = {},
+//    enabled: Boolean = true,
+//    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+//    elevation: ButtonElevation? = ButtonDefaults.elevation(),
+//    shape: Shape = MaterialTheme.shapes.small,
+//    border: BorderStroke? = null,
+//    colors: ButtonColors = ButtonDefaults.buttonColors(),
+//    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+//    content: @Composable RowScope.() -> Unit
+//) {
+//    val contentColor by colors.contentColor(enabled)
+//    var tapped by remember { mutableStateOf(false) }
+//    Surface(
+//        modifier = modifier
+//            .clip(shape)
+//            .indication(interactionSource, LocalIndication.current)
+//            .pointerInput(Unit) {
+//                detectTapGestures(
+//                    onPress = { offset ->
+//                        tapped = true
+//                        val press = PressInteraction.Press(offset)
+//                        interactionSource.emit(press)
+//                        tryAwaitRelease()
+//                        interactionSource.emit(PressInteraction.Release(press))
+//                        tapped = false
+//                    },
+//                    onTap = { onClick() },
+//                    onLongPress = { onLongClick() }
+//                )
+//            }
+//        ,
+//        shape = shape,
+//        color = colors.backgroundColor(enabled).value,
+//        contentColor = contentColor.copy(alpha = 1f),
+//        border = border,
+//        elevation = elevation?.elevation(enabled, interactionSource)?.value ?: 0.dp,
+//    ) {
+//        CompositionLocalProvider(LocalContentAlpha provides contentColor.alpha) {
+//            ProvideTextStyle(
+//                value = MaterialTheme.typography.button
+//            ) {
+//                Row(
+//                    Modifier
+//                        .defaultMinSize(
+//                            minWidth = ButtonDefaults.MinWidth,
+//                            minHeight = ButtonDefaults.MinHeight
+//                        )
+//                        .padding(contentPadding),
+//                    horizontalArrangement = Arrangement.Center,
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    content = content
+//                )
+//            }
+//        }
+//    }
+//}

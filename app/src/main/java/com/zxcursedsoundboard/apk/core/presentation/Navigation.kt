@@ -1,0 +1,115 @@
+package com.zxcursedsoundboard.apk.core.presentation
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material.BackdropScaffold
+import androidx.compose.material.BackdropValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.ListItem
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.rememberBackdropScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.zxcursedsoundboard.apk.ZxcursedSoundScreen
+import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteScreen
+import com.zxcursedsoundboard.apk.feature_main.presentation.ZxcursedMainScreen
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun Navigation(
+    navController: NavHostController = rememberNavController(),
+    startDestination: String = Screens.MainScreen.route
+) {
+
+    val scaffoldState = rememberBackdropScaffoldState(initialValue = BackdropValue.Concealed)
+    val scope = rememberCoroutineScope()
+
+    val itemsScreens = listOf(
+        Screens.MainScreen,
+        Screens.SoundScreen,
+        Screens.FavouriteScreen
+    )
+
+    BackdropScaffold(
+        backLayerBackgroundColor = MaterialTheme.colors.background,
+        scaffoldState = scaffoldState,
+        appBar = {
+            TopAppBar(
+                title = {
+
+                },
+                navigationIcon = {
+                    if (scaffoldState.isConcealed) {
+                        IconButton(
+                            onClick = {
+                                scope.launch { scaffoldState.reveal() }
+                            }
+                        ) {
+                            Icon(
+                                Icons.Default.Menu,
+                                contentDescription = "Menu"
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = {
+                                scope.launch { scaffoldState.conceal() }
+                            }
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Close"
+                            )
+                        }
+                    }
+                },
+                elevation = 0.dp,
+                backgroundColor = Color.Transparent
+            )
+        },
+        backLayerContent = {
+            itemsScreens.forEach {
+                Column {
+                    ListItem(text = { Text(text = it.nameScreen) }, modifier = Modifier.clickable {
+                        navController.navigate(it.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    })
+                }
+            }
+        },
+        frontLayerContent = {
+            NavHost(navController = navController, startDestination = startDestination) {
+                composable(Screens.MainScreen.route) {
+                    ZxcursedMainScreen()
+                }
+                composable(Screens.SoundScreen.route) {
+                    ZxcursedSoundScreen()
+                }
+                composable(Screens.FavouriteScreen.route) {
+                    FavouriteScreen()
+                }
+            }
+        },
+    )
+}

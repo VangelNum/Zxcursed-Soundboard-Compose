@@ -8,7 +8,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.zxcursedsoundboard.apk.pages.musicStop
 
 @Composable
 fun LifeOfApplication(context: Context) {
@@ -43,7 +42,7 @@ fun LifeOfApplication(context: Context) {
                 Log.d("Tag", "DESTROY")
             }
             Lifecycle.Event.ON_PAUSE -> {
-                musicStop()
+                //musicStop()
                 Log.d("Tag", "PAUSE")
             }
             Lifecycle.Event.ON_STOP -> {
