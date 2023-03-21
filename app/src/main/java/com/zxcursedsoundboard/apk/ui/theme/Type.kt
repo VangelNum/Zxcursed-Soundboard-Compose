@@ -21,19 +21,17 @@ val UbuntyFonts = FontFamily(
 )
 
 val Typography = Typography(
-    h4 = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    ),
     h3 = TextStyle(
         fontFamily = UbuntyFonts,
         fontWeight = FontWeight.Bold,
         fontSize = 30.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.sp
+    ),
+    h4 = TextStyle(
+        fontFamily = UbuntyFonts,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp
     ),
     h5 = TextStyle(
         fontFamily = UbuntyFonts,

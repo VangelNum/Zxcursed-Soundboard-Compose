@@ -1,115 +1,133 @@
 package com.zxcursedsoundboard.apk.core.presentation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.BackdropScaffold
-import androidx.compose.material.BackdropValue
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.rememberBackdropScaffoldState
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.ZxcursedSoundScreen
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteScreen
 import com.zxcursedsoundboard.apk.feature_main.presentation.ZxcursedMainScreen
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Navigation(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screens.MainScreen.route
+    startDestination: String = Screens.NavigationScreen.route
 ) {
+    val mainViewModel = viewModel<MainViewModel>()
+    val currentPosition = mainViewModel.currentPosition.collectAsState()
+    val isPlaying = mainViewModel.isPlaying.collectAsState()
+    val songName = mainViewModel.songName.collectAsState()
+    val songImage = mainViewModel.songImage.collectAsState()
 
-    val scaffoldState = rememberBackdropScaffoldState(initialValue = BackdropValue.Concealed)
-    val scope = rememberCoroutineScope()
-
-    val itemsScreens = listOf(
-        Screens.MainScreen,
-        Screens.SoundScreen,
-        Screens.FavouriteScreen
-    )
-
-    BackdropScaffold(
-        backLayerBackgroundColor = MaterialTheme.colors.background,
-        scaffoldState = scaffoldState,
-        appBar = {
+    Scaffold(
+        topBar = {
             TopAppBar(
-                title = {
-
-                },
+                title = { /*TODO*/ },
                 navigationIcon = {
-                    if (scaffoldState.isConcealed) {
-                        IconButton(
-                            onClick = {
-                                scope.launch { scaffoldState.reveal() }
-                            }
-                        ) {
-                            Icon(
-                                Icons.Default.Menu,
-                                contentDescription = "Menu"
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(imageVector = Icons.Outlined.Menu, contentDescription = "menu")
+                    }
+                })
+        },
+    ) {
+        NavHost(
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier.padding(it)
+        ) {
+            composable(Screens.NavigationScreen.route) {
+                NavigationScreen(navController)
+            }
+            composable(Screens.ZxcursedMainScreen.route) {
+                ZxcursedMainScreen(mainViewModel)
+            }
+            composable(Screens.ZxcursedSoundScreen.route) {
+                ZxcursedSoundScreen()
+            }
+            composable(Screens.FavouriteScreen.route) {
+                FavouriteScreen()
+            }
+        }
+        Box(
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter
+        ) {
+            AnimatedVisibility(songName.value != 0, enter = slideInVertically { offset ->
+                offset
+            }) {
+                Box(modifier = Modifier
+                    .background(MaterialTheme.colors.surface)
+                    .clickable {
+
+                    }) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Card {
+                            Image(
+                                painter = painterResource(id = songImage.value),
+                                contentDescription = null,
+                                modifier = Modifier.size(60.dp)
                             )
                         }
-                    } else {
-                        IconButton(
-                            onClick = {
-                                scope.launch { scaffoldState.conceal() }
+                        Column {
+                            Text(text = stringResource(id = songName.value))
+                            Text(text = "music subtitle")
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (isPlaying.value) {
+                            IconButton(onClick = { mainViewModel.pause() }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.outline_pause_24),
+                                    contentDescription = "pause"
+                                )
                             }
-                        ) {
-                            Icon(
-                                Icons.Default.Close,
-                                contentDescription = "Close"
-                            )
+                        } else {
+                            IconButton(onClick = { mainViewModel.play() }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.outline_play_arrow_24),
+                                    contentDescription = "play"
+                                )
+                            }
                         }
                     }
-                },
-                elevation = 0.dp,
-                backgroundColor = Color.Transparent
-            )
-        },
-        backLayerContent = {
-            itemsScreens.forEach {
-                Column {
-                    ListItem(text = { Text(text = it.nameScreen) }, modifier = Modifier.clickable {
-                        navController.navigate(it.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    })
                 }
             }
-        },
-        frontLayerContent = {
-            NavHost(navController = navController, startDestination = startDestination) {
-                composable(Screens.MainScreen.route) {
-                    ZxcursedMainScreen()
-                }
-                composable(Screens.SoundScreen.route) {
-                    ZxcursedSoundScreen()
-                }
-                composable(Screens.FavouriteScreen.route) {
-                    FavouriteScreen()
-                }
-            }
-        },
-    )
+        }
+    }
 }

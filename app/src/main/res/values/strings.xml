@@ -57,7 +57,7 @@
     <string name="ludikikautsa">люди кикаются</string>
     <string name="superpoxui">суперпохуй на игру</string>
     <string name="alwayswannaalttab">alwayswannaalttab</string>
-    <string name="_0_10">это ты на сфе 0 - 10?</string>
+    <string name="_0_10">это ты на сфе 0 – 10?</string>
     <string name="mamont">А я похож на мамонта?</string>
     <string name="gerichabi">герыча бы бахнуть</string>
     <string name="jenarojala">жена рожала</string>
@@ -89,5 +89,11 @@
     <string name="zerozriteley">0 зрителей</string>
     <string name="zavaliebalo">Завали ебало</string>
     <string name="razban">Скоро разбанят</string>
+
+    <string name="cursed">КУРСЕД</string>
+    <string name="sounds_cursed">ПЕСНИ КУРСЕДА</string>
+    <string name="favourite">ИЗБРАННОЕ</string>
+    <string name="navigation">НАВИГАЦИЯ</string>
+
 
 </resources>
