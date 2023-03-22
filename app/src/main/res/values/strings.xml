@@ -94,6 +94,8 @@
     <string name="sounds_cursed">ПЕСНИ КУРСЕДА</string>
     <string name="favourite">ИЗБРАННОЕ</string>
     <string name="navigation">НАВИГАЦИЯ</string>
+    <string name="watch_audio">Посмотреть аудио</string>
+    <string name="zxcursed">Zxcursed</string>
 
 
 </resources>

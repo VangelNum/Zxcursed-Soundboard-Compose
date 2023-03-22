@@ -1,6 +1,6 @@
 package com.zxcursedsoundboard.apk.ui.theme
 
-import androidx.compose.material.Typography
+import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -21,19 +21,21 @@ val UbuntyFonts = FontFamily(
 )
 
 val Typography = Typography(
-    h3 = TextStyle(
-        fontFamily = UbuntyFonts,
-        fontWeight = FontWeight.Bold,
-        fontSize = 30.sp,
-    ),
-    h4 = TextStyle(
-        fontFamily = UbuntyFonts,
+    bodyLarge = TextStyle(
+        fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
     ),
-    h5 = TextStyle(
+    titleLarge = TextStyle(
+        fontFamily = UbuntyFonts,
+        fontWeight = FontWeight.Bold,
+        fontSize = 30.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.sp
+    ),
+    titleMedium = TextStyle(
         fontFamily = UbuntyFonts,
         fontSize = 16.sp,
         fontWeight = FontWeight.Normal,

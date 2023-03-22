@@ -18,12 +18,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
@@ -52,26 +52,31 @@ fun ZxcursedMainScreen(
     favouriteViewModel: FavouriteViewModel = hiltViewModel()
 ) {
     val favouriteState = favouriteViewModel.favouriteState.collectAsState()
-    val currentPosition = mainViewModel.currentPosition.collectAsState()
+    val currentPosition = mainViewModel.currentPositionIndex.collectAsState()
     val isPlaying = mainViewModel.isPlaying.collectAsState()
     val context = LocalContext.current
     val mediaItems = remember {
         mutableStateListOf(
-            MediaItem(R.raw.cursed2, R.string.pivo, R.drawable.pivo),
-            MediaItem(R.raw.cursed3, R.string.molchat, R.drawable.molchat),
-            MediaItem(R.raw.cursed4, R.string.traxat, R.drawable.traxat),
-            MediaItem(R.raw.cursed5, R.string.pikaper, R.drawable.pikaper),
-            MediaItem(R.raw.cursed6, R.string.sydalut, R.drawable.sydalut),
-            MediaItem(R.raw.cursed7, R.string.madmyazel, R.drawable.madmyazel),
-            MediaItem(R.raw.cursed8, R.string.chtoetoblyat, R.drawable.chtoetoblyat),
-            MediaItem(R.raw.cursed9, R.string.spasibo, R.drawable.spasibo),
-            MediaItem(R.raw.cursed10, R.string.denegnet, R.drawable.denegnet),
-            MediaItem(R.raw.cursed11, R.string.minuspivo, R.drawable.minuspivo),
+            MediaItem(R.raw.cursed2, R.string.pivo, R.string.zxcursed, R.drawable.pivo),
+            MediaItem(R.raw.cursed3, R.string.molchat, R.string.zxcursed, R.drawable.molchat),
+            MediaItem(R.raw.cursed4, R.string.traxat, R.string.zxcursed, R.drawable.traxat),
+            MediaItem(R.raw.cursed5, R.string.pikaper, R.string.zxcursed, R.drawable.pikaper),
+            MediaItem(R.raw.cursed6, R.string.sydalut, R.string.zxcursed, R.drawable.sydalut),
+            MediaItem(R.raw.cursed7, R.string.madmyazel, R.string.zxcursed, R.drawable.madmyazel),
+            MediaItem(
+                R.raw.cursed8,
+                R.string.chtoetoblyat,
+                R.string.zxcursed,
+                R.drawable.chtoetoblyat
+            ),
+            MediaItem(R.raw.cursed9, R.string.spasibo, R.string.zxcursed, R.drawable.spasibo),
+            MediaItem(R.raw.cursed10, R.string.denegnet, R.string.zxcursed, R.drawable.denegnet),
+            MediaItem(R.raw.cursed11, R.string.minuspivo, R.string.zxcursed, R.drawable.minuspivo),
         )
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 100.dp),
+        contentPadding = PaddingValues(all = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         itemsIndexed(mediaItems) { index, item ->
@@ -84,6 +89,7 @@ fun ZxcursedMainScreen(
                             context,
                             songRes = item.audioResId,
                             item.songNameRes,
+                            item.songAuthor,
                             item.imageRes
                         )
                     },
@@ -120,7 +126,7 @@ fun ZxcursedMainScreen(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(text = "Zxcursed", Modifier.alpha(0.5f))
+                    Text(text = stringResource(id = item.songAuthor), Modifier.alpha(0.5f))
                 }
                 Spacer(modifier = Modifier.weight(1f))
 

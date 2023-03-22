@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -73,7 +73,7 @@ fun ZxcursedSoundScreen() {
                 ) {
                     Text(
                         text = stringResource(id = text).uppercase(),
-                        style = MaterialTheme.typography.h4
+                        style = MaterialTheme.typography.titleMedium
                     )
                 }
             }

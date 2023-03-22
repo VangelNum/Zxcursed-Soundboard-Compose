@@ -3,9 +3,11 @@ package com.zxcursedsoundboard.apk.core.presentation
 import android.content.Context
 import android.media.MediaPlayer
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
     private var mediaPlayer: MediaPlayer? = null
@@ -13,22 +15,37 @@ class MainViewModel : ViewModel() {
     private var _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
-    private var _currentPosition = MutableStateFlow(-1)
-    val currentPosition: StateFlow<Int> = _currentPosition.asStateFlow()
+    private var _currentPositionIndex = MutableStateFlow(-1)
+    val currentPositionIndex: StateFlow<Int> = _currentPositionIndex.asStateFlow()
 
     private var _songName = MutableStateFlow(0)
     val songName = _songName.asStateFlow()
+
+    private var _songAuthor = MutableStateFlow(0)
+    val songAuthor = _songAuthor.asStateFlow()
 
     private var _songImage = MutableStateFlow(0)
     val songImage = _songImage.asStateFlow()
 
     private var _duration = MutableStateFlow(0)
-    val duration: StateFlow<Int> = _duration
+    val duration = _duration.asStateFlow()
 
-    fun setMedia(index: Int, context: Context, songRes: Int, songName: Int, songImage: Int) {
+    private var _currentTimeMedia = MutableStateFlow(0)
+    val currentTimeMedia = _currentTimeMedia.asStateFlow()
+
+
+    fun setMedia(
+        index: Int,
+        context: Context,
+        songRes: Int,
+        songName: Int,
+        songAuthor: Int,
+        songImage: Int
+    ) {
+        _songAuthor.value = songAuthor
         _songName.value = songName
         _songImage.value = songImage
-        if (index == _currentPosition.value && mediaPlayer != null) {
+        if (index == _currentPositionIndex.value && mediaPlayer != null) {
             if (mediaPlayer?.isPlaying == true) {
                 mediaPlayer?.pause()
                 _isPlaying.value = false
@@ -47,12 +64,25 @@ class MainViewModel : ViewModel() {
                     setOnCompletionListener {
                         _isPlaying.value = false
                     }
-                    setOnPreparedListener {
-                        it.start()
+                    setOnPreparedListener { media ->
+                        media.start()
                         _isPlaying.value = true
-                        _currentPosition.value = index
+                        _currentPositionIndex.value = index
+                        _duration.value = media.duration
+
                     }
                 }
+        }
+        updateTime()
+    }
+
+    private fun updateTime() {
+        viewModelScope.launch {
+            while (isPlaying.value) {
+                if (mediaPlayer!=null) {
+                    _currentTimeMedia.value = mediaPlayer!!.currentPosition
+                }
+            }
         }
     }
 
@@ -68,7 +98,7 @@ class MainViewModel : ViewModel() {
 
     fun seekTo(position: Int) {
         mediaPlayer?.seekTo(position)
-        _currentPosition.value = position
+        _currentPositionIndex.value = position
     }
 
     override fun onCleared() {
