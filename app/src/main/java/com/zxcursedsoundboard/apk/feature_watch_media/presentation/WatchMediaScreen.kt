@@ -12,23 +12,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WatchMediaScreen(
     mainViewModel: MainViewModel,
@@ -37,10 +43,10 @@ fun WatchMediaScreen(
     songImage: State<Int>,
     songAuthor: State<Int>,
     duration: State<Int>,
-    currentTimeMedia: State<Int>
+    currentTimeMedia: State<Int>,
+    looping: State<Boolean>
 ) {
-
-
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -59,36 +65,53 @@ fun WatchMediaScreen(
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
+            modifier = Modifier.padding(start = 4.dp),
             text = stringResource(id = songAuthor.value),
             style = MaterialTheme.typography.titleMedium
         )
         Text(
             text = stringResource(id = songName.value),
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.alpha(0.5f)
+            modifier = Modifier
+                .alpha(0.5f)
+                .padding(start = 4.dp)
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Text(text = currentTimeMedia.value.toString(), style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.weight(1f))
-            Text(text = duration.value.toString(), style = MaterialTheme.typography.titleMedium)
+        CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+            Slider(
+                value = currentTimeMedia.value.toFloat(),
+                onValueChange = {
+                    mainViewModel.setCurrentTime(it.toInt())
+                },
+                valueRange = 0f..duration.value.toFloat(),
+                modifier = Modifier.fillMaxWidth(1f)
+            )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 4.dp, end = 4.dp)) {
+            Text(
+                text = currentTimeMedia.value.formatTime(),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(text = duration.value.formatTime(), style = MaterialTheme.typography.titleMedium)
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = {
+                mainViewModel.setLopping()
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.outline_loop_24),
                     contentDescription = "looping",
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(30.dp),
+                    tint = if (looping.value) MaterialTheme.colorScheme.primaryContainer else LocalContentColor.current
                 )
             }
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { mainViewModel.playPreviousMedia(context) }) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_skip_previous_24),
                     contentDescription = "previous",
@@ -112,14 +135,14 @@ fun WatchMediaScreen(
                     )
                 }
             }
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { mainViewModel.playNextMedia(context) }) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_skip_next_24),
                     contentDescription = "next",
                     modifier = Modifier.size(30.dp)
                 )
             }
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { }) {
                 Icon(
                     painter = painterResource(id = R.drawable.outline_format_list_bulleted_24),
                     contentDescription = "listOfMusic",
@@ -128,5 +151,11 @@ fun WatchMediaScreen(
             }
         }
     }
+}
 
+fun Int.formatTime(): String {
+    val durationOfMedia = this / 1000
+    val minutes = durationOfMedia / 60
+    val seconds = durationOfMedia % 60
+    return String.format("%02d:%02d", minutes, seconds)
 }
