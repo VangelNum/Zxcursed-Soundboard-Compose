@@ -37,32 +37,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.zxcursedsoundboard.apk.R
+import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
 import com.zxcursedsoundboard.apk.feature_main.presentation.ZxcursedMainScreen
 import com.zxcursedsoundboard.apk.feature_watch_media.presentation.WatchMediaScreen
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun Navigation(
-    startDestination: String = Screens.NavigationScreen.route
+    startDestination: String = Screens.NavigationScreen.route,
+    favouriteViewModel: FavouriteViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel()
 ) {
     val navController: NavHostController = rememberAnimatedNavController()
-    val mainViewModel = viewModel<MainViewModel>()
-    val isPlaying = mainViewModel.isPlaying.collectAsState()
-    val songName = mainViewModel.songName.collectAsState()
-    val songImage = mainViewModel.songImage.collectAsState()
-    val songAuthor = mainViewModel.songAuthor.collectAsState()
-    val duration = mainViewModel.duration.collectAsState()
-    val currentTimeMedia = mainViewModel.currentTimeMedia.collectAsState()
-    val looping = mainViewModel.looping.collectAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination?.route
+
+    val isPlaying = mainViewModel.isPlaying.collectAsState()
+    val currentSong = mainViewModel.currentSong.collectAsState()
+    val duration = mainViewModel.duration.collectAsState()
+    val currentTimeMedia = mainViewModel.currentTimeMedia.collectAsState(0)
+    val looping = mainViewModel.looping.collectAsState()
 
     Scaffold(
         topBar = {
@@ -97,13 +98,12 @@ fun Navigation(
             ) {
                 WatchMediaScreen(
                     mainViewModel = mainViewModel,
-                    isPlaying = isPlaying,
-                    songName = songName,
-                    songImage = songImage,
-                    songAuthor = songAuthor,
-                    duration = duration,
-                    currentTimeMedia = currentTimeMedia,
-                    looping = looping
+                    isPlaying = isPlaying.value,
+                    duration = duration.value,
+                    currentTimeMedia = currentTimeMedia.value,
+                    looping = looping.value,
+                    currentSong = currentSong.value,
+                    favouriteViewModel = favouriteViewModel
                 )
             }
             composable(
@@ -139,11 +139,17 @@ fun Navigation(
                         }
                     }
                 },
-            ) { ZxcursedMainScreen(mainViewModel) }
+            ) {
+                ZxcursedMainScreen(
+                    mainViewModel,
+                    isPlaying = isPlaying.value,
+                    favouriteViewModel = favouriteViewModel
+                )
+            }
 
         }
         AnimatedVisibility(
-            songName.value != 0 && currentDestination != Screens.WatchMediaScreen.route,
+            currentSong.value.author != -1 && currentDestination != Screens.WatchMediaScreen.route,
             enter = slideInVertically(
                 initialOffsetY = { it },
                 animationSpec = tween(durationMillis = 400)
@@ -168,14 +174,14 @@ fun Navigation(
                     ) {
                         Card {
                             Image(
-                                painter = painterResource(id = songImage.value),
+                                painter = painterResource(id = currentSong.value.image),
                                 contentDescription = null,
                                 modifier = Modifier.size(60.dp)
                             )
                         }
                         Column {
-                            Text(text = stringResource(id = songName.value))
-                            Text(text = stringResource(id = songAuthor.value))
+                            Text(text = stringResource(id = currentSong.value.name))
+                            Text(text = stringResource(id = currentSong.value.author))
                         }
                         Spacer(modifier = Modifier.weight(1f))
                         if (isPlaying.value) {

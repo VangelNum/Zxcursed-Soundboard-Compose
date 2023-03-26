@@ -97,6 +97,9 @@
     <string name="navigation">НАВИГАЦИЯ</string>
     <string name="watch_audio">Посмотреть аудио</string>
     <string name="zxcursed">Zxcursed</string>
+    <string name="download_complete_notification_title">Download complete in download folder</string>
+    <string name="download_complete_notification_message">File downloaded</string>
+    <string name="grand_permission">Please grant permission to download the file</string>
 
 
 </resources>

@@ -1,6 +1,6 @@
 package com.zxcursedsoundboard.apk.feature_main.presentation
 
-import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,22 +43,47 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.zxcursedsoundboard.apk.R
+import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
 
-
 @Composable
 fun ZxcursedMainScreen(
     mainViewModel: MainViewModel,
-    favouriteViewModel: FavouriteViewModel = hiltViewModel()
+    isPlaying: Boolean?,
+    favouriteViewModel: FavouriteViewModel
 ) {
     val favouriteState = favouriteViewModel.favouriteState.collectAsState()
     val currentPosition = mainViewModel.currentPositionIndex.collectAsState()
-    val isPlaying = mainViewModel.isPlaying.collectAsState()
     val context = LocalContext.current
+    LaunchedEffect(key1 = Unit) {
+        mainViewModel.downloadStatus.collect { downloadStatus ->
+            when (downloadStatus) {
+                is DownloadStatus.Success -> {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.download_complete_notification_title),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                is DownloadStatus.Error -> {
+                    Toast.makeText(
+                        context,
+                        downloadStatus.message,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                else -> {
+                    Unit
+                }
+            }
+        }
+    }
+
     var expandedIndex by remember { mutableStateOf(-1) }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -91,7 +117,7 @@ fun ZxcursedMainScreen(
                     }
                     //not work with standard AnimatedVisibility
                     androidx.compose.animation.AnimatedVisibility(
-                        index == currentPosition.value && isPlaying.value,
+                        index == currentPosition.value && isPlaying == true,
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
@@ -119,7 +145,11 @@ fun ZxcursedMainScreen(
                 IconButton(onClick = {
                     val song = FavouriteEntity(
                         songName = songNameRes,
-                        songRes = mainViewModel.mediaItemsMain[index].audioResId
+                        songAuthor = context.getString(item.songAuthor),
+                        songImageRes = item.imageRes,
+                        item.audioResId
+                        //songRes = mainViewModel.mediaItemsMain[index].audioResId,
+
                     )
                     if (isFavourite) {
                         favouriteViewModel.deleteSong(songNameRes)
@@ -159,7 +189,13 @@ fun ZxcursedMainScreen(
                         ) {
                             DropdownMenuItem(
                                 text = { Text(text = stringResource(id = R.string.download)) },
-                                onClick = { downloadFile(context, item.audioResId) },
+                                onClick = {
+                                    mainViewModel.downloadRawFile(
+                                        context,
+                                        item.audioResId,
+                                        context.getString(item.songNameRes)
+                                    )
+                                },
                                 leadingIcon = {
                                     Icon(
                                         painterResource(id = R.drawable.ic_baseline_download_24),
@@ -167,18 +203,27 @@ fun ZxcursedMainScreen(
                                     )
                                 }
                             )
+                            DropdownMenuItem(
+                                text = { Text(text = stringResource(id = R.string.share)) },
+                                onClick = {
+                                    mainViewModel.share(
+                                        context = context,
+                                        resourceId = item.audioResId,
+                                        fileName = context.getString(item.songNameRes)
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        painterResource(id = R.drawable.ic_baseline_share_24),
+                                        contentDescription = null
+                                    )
+                                }
+                            )
                         }
                     }
                 }
-
-
             }
         }
     }
-}
-
-
-fun downloadFile(context: Context, resourceId: Int) {
-    //TODO
 }
 

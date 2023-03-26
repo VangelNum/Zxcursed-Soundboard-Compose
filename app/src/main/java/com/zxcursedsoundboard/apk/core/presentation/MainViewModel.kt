@@ -1,44 +1,56 @@
 package com.zxcursedsoundboard.apk.core.presentation
 
 import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zxcursedsoundboard.apk.BuildConfig
 import com.zxcursedsoundboard.apk.R
-import com.zxcursedsoundboard.apk.core.data.MediaItem
+import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
+import com.zxcursedsoundboard.apk.core.data.model.MediaItem
+import com.zxcursedsoundboard.apk.core.data.model.Song
+import com.zxcursedsoundboard.apk.core.domain.repository.FileRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
+
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val fileRepository: FileRepository
+) : ViewModel() {
     private var mediaPlayer: MediaPlayer? = null
-
-    private var _isPlaying = MutableStateFlow(false)
-    val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
     private var _currentPositionIndex = MutableStateFlow(-1)
     val currentPositionIndex: StateFlow<Int> = _currentPositionIndex.asStateFlow()
 
-    private var _songName = MutableStateFlow(0)
-    val songName = _songName.asStateFlow()
-
-    private var _songAuthor = MutableStateFlow(0)
-    val songAuthor = _songAuthor.asStateFlow()
-
-    private var _songImage = MutableStateFlow(0)
-    val songImage = _songImage.asStateFlow()
+    private val _currentSong = MutableStateFlow(Song(-1, -1, -1))
+    val currentSong: StateFlow<Song> = _currentSong.asStateFlow()
 
     private var _duration = MutableStateFlow(0)
     val duration = _duration.asStateFlow()
 
-    private var _currentTimeMedia = MutableStateFlow(0)
-    val currentTimeMedia = _currentTimeMedia.asStateFlow()
+    private var _currentTimeMedia = MutableSharedFlow<Int>()
+    val currentTimeMedia: SharedFlow<Int> = _currentTimeMedia.asSharedFlow()
 
     private var _looping = MutableStateFlow(false)
     val looping = _looping.asStateFlow()
+
+    private val _downloadStatus = MutableSharedFlow<DownloadStatus>()
+    val downloadStatus: SharedFlow<DownloadStatus> = _downloadStatus.asSharedFlow()
+
+    private var _isPlaying = MutableStateFlow(false)
+    val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
     val mediaItemsMain = listOf(
         MediaItem(R.raw.cursed2, R.string.pivo, R.string.zxcursed, R.drawable.pivo),
@@ -53,6 +65,19 @@ class MainViewModel : ViewModel() {
         MediaItem(R.raw.cursed11, R.string.minuspivo, R.string.zxcursed, R.drawable.minuspivo),
     )
 
+
+    fun downloadRawFile(context: Context, rawResId: Int, fileName: String) {
+        viewModelScope.launch {
+            _downloadStatus.emit(DownloadStatus.Loading)
+            val isSuccess = fileRepository.downloadRawFile(context, rawResId, fileName)
+            if (isSuccess) {
+                _downloadStatus.emit(DownloadStatus.Success)
+            } else {
+                _downloadStatus.emit(DownloadStatus.Error("Failed to save file"))
+            }
+        }
+    }
+
     fun setMedia(
         index: Int,
         context: Context,
@@ -61,15 +86,14 @@ class MainViewModel : ViewModel() {
         songAuthor: Int,
         songImage: Int
     ) {
-        _songAuthor.value = songAuthor
-        _songName.value = songName
-        _songImage.value = songImage
+        val song = Song(songAuthor, songName, songImage)
+        _currentSong.value = song
         if (index == _currentPositionIndex.value && mediaPlayer != null) {
             togglePlayback()
         } else {
-            mediaPlayer?.apply {
-                stop()
-                release()
+            mediaPlayer?.let {
+                it.stop()
+                it.release()
             }
             mediaPlayer = MediaPlayer
                 .create(context, songRes)
@@ -79,7 +103,6 @@ class MainViewModel : ViewModel() {
                             media.start()
                         } else {
                             playNextMedia(context)
-                            _isPlaying.value = false
                         }
                     }
                     setOnPreparedListener { media ->
@@ -108,15 +131,14 @@ class MainViewModel : ViewModel() {
     //work only in dispatcher.main
     private fun updateCurrentTimePosition() {
         viewModelScope.launch(Dispatchers.Main) {
-            while (isPlaying.value) {
+            while (_isPlaying.value) {
                 val currentPosition = mediaPlayer?.currentPosition ?: 0
-                _currentTimeMedia.value = currentPosition
-                delay(16L) //just to not block UI
+                _currentTimeMedia.emit(currentPosition)
             }
         }
     }
 
-    fun setLopping() {
+    fun toggleLooping() {
         _looping.value = !_looping.value
     }
 
@@ -133,7 +155,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun playPreviousMedia(context: Context) {
-        var newIndex = currentPositionIndex.value - 1
+        var newIndex = _currentPositionIndex.value - 1
         if (newIndex < 0) {
             newIndex = mediaItemsMain.size - 1
         }
@@ -149,7 +171,9 @@ class MainViewModel : ViewModel() {
 
     fun setCurrentTime(position: Int) {
         mediaPlayer?.seekTo(position)
-        _currentTimeMedia.value = position
+        viewModelScope.launch(Dispatchers.Main) {
+            _currentTimeMedia.emit(position)
+        }
     }
 
     fun play() {
@@ -165,5 +189,28 @@ class MainViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         mediaPlayer?.release()
+    }
+
+    fun share(context: Context, resourceId: Int, fileName: String) {
+        val mediaFile = context.resources.openRawResourceFd(resourceId)
+        val mediaUri = FileProvider.getUriForFile(
+            context,
+            "${BuildConfig.APPLICATION_ID}.fileprovider",
+            File(context.cacheDir, " $fileName.mp3")
+        )
+        val outputStream = context.contentResolver.openOutputStream(mediaUri)
+        mediaFile.createInputStream().use { input ->
+            outputStream.use { output ->
+                if (output != null) {
+                    input.copyTo(output)
+                }
+            }
+        }
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "audio/mp3"
+            putExtra(Intent.EXTRA_STREAM, mediaUri)
+        }
+        val chooser = Intent.createChooser(intent, "Share media file")
+        context.startActivity(chooser)
     }
 }

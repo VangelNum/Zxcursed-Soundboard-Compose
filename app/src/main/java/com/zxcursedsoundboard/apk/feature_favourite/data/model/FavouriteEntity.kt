@@ -7,5 +7,7 @@ import androidx.room.PrimaryKey
 data class FavouriteEntity(
     @PrimaryKey(autoGenerate = false)
     val songName: String,
-    val songRes: Int
+    val songAuthor: String,
+    val songImageRes: Int,
+    val songAudioRes: Int
 )

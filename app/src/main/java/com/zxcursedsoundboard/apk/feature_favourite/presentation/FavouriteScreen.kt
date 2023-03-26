@@ -51,7 +51,7 @@ fun FavouriteScreenItems(data: List<FavouriteEntity>) {
             OutlinedButton(onClick = {
                 val media0: MediaPlayer? = MediaPlayer.create(
                     context,
-                    it.songRes
+                    it.songAudioRes
                 )
                 media0?.start()
             }) {
