@@ -1,7 +1,9 @@
 package com.zxcursedsoundboard.apk.feature_watch_media.presentation
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zxcursedsoundboard.apk.R
+import com.zxcursedsoundboard.apk.core.data.model.MediaItem
 import com.zxcursedsoundboard.apk.core.data.model.Song
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
@@ -54,7 +59,9 @@ fun WatchMediaScreen(
     currentTimeMedia: Int,
     looping: Boolean,
     currentSong: Song,
-    favouriteViewModel: FavouriteViewModel
+    listOfMedia: List<MediaItem>,
+    favouriteViewModel: FavouriteViewModel,
+    routeOfPlayingSong: String
 ) {
     val context = LocalContext.current
     val currentPosition = mainViewModel.currentPositionIndex.collectAsState()
@@ -63,8 +70,8 @@ fun WatchMediaScreen(
         mutableStateOf(false)
     }
     LaunchedEffect(key1 = currentSong) {
-        isFavourite = favouriteState.value.data?.toString()
-            ?.contains(context.getString(currentSong.name)) == true
+        isFavourite =
+            favouriteState.value.data?.toString()?.contains(currentSong.name.toString()) == true
     }
 
     Column(
@@ -73,29 +80,16 @@ fun WatchMediaScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Card(shape = MaterialTheme.shapes.extraLarge) {
-            Image(
-                painter = painterResource(id = currentSong.image),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth(1f)
-                    .fillMaxHeight(0.5f)
-            )
-        }
+        CardItem(
+            currentSong.image,
+            mainViewModel,
+            context,
+            currentSong.mediaRes,
+            currentSong.name
+        )
         Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            modifier = Modifier.padding(start = 4.dp),
-            text = stringResource(id = currentSong.name),
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            text = stringResource(id = currentSong.author),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .alpha(0.5f)
-                .padding(start = 4.dp)
-        )
+        AuthorAndTitleItem(currentSong.name, currentSong.author)
+
         CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
             Slider(
                 value = currentTimeMedia.toFloat(),
@@ -133,7 +127,9 @@ fun WatchMediaScreen(
                     tint = if (looping) MaterialTheme.colorScheme.primaryContainer else LocalContentColor.current
                 )
             }
-            IconButton(onClick = { mainViewModel.playPreviousMedia(context) }) {
+            IconButton(onClick = {
+                mainViewModel.playPreviousMedia(context, listOfMedia, routeOfPlayingSong)
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_skip_previous_24),
                     contentDescription = "previous",
@@ -157,7 +153,10 @@ fun WatchMediaScreen(
                     )
                 }
             }
-            IconButton(onClick = { mainViewModel.playNextMedia(context) }) {
+            IconButton(onClick = {
+                mainViewModel.playNextMedia(context, listOfMedia, routeOfPlayingSong)
+            })
+            {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_skip_next_24),
                     contentDescription = "next",
@@ -166,12 +165,12 @@ fun WatchMediaScreen(
             }
             if (isFavourite) {
                 IconButton(onClick = {
-                    favouriteViewModel.deleteSong(context.getString(currentSong.name))
+                    favouriteViewModel.deleteSong(currentSong.name)
                     isFavourite = false
                 }) {
                     Icon(
                         imageVector = Icons.Outlined.Favorite,
-                        contentDescription = "listOfMusic",
+                        contentDescription = "delete from favourite",
                         modifier = Modifier.size(30.dp),
                         tint = Color.Red
                     )
@@ -180,18 +179,112 @@ fun WatchMediaScreen(
                 IconButton(onClick = {
                     favouriteViewModel.addSong(
                         FavouriteEntity(
-                            context.getString(currentSong.name),
-                            context.getString(currentSong.author),
+                            currentSong.name,
+                            currentSong.author,
                             currentSong.image,
-                            mainViewModel.mediaItemsMain[currentPosition.value].audioResId
+                            currentSong.mediaRes
                         )
                     )
                     isFavourite = true
                 }) {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_favorite_border_24),
-                        contentDescription = "listOfMusic",
+                        contentDescription = "add to favourite",
                         modifier = Modifier.size(30.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AuthorAndTitleItem(name: Int, author: Int) {
+    Text(
+        modifier = Modifier.padding(start = 4.dp),
+        text = stringResource(id = name),
+        style = MaterialTheme.typography.titleMedium
+    )
+    Text(
+        text = stringResource(id = author),
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier
+            .alpha(0.5f)
+            .padding(start = 4.dp)
+    )
+}
+
+@Composable
+fun CardItem(
+    image: Int,
+    mainViewModel: MainViewModel,
+    context: Context,
+    audioRes: Int,
+    songNameRes: Int
+) {
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(1f)
+            .fillMaxHeight(0.5f), contentAlignment = Alignment.BottomEnd
+    ) {
+        Card(shape = MaterialTheme.shapes.extraLarge) {
+            Image(
+                painter = painterResource(id = image),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+            )
+        }
+        Box() {
+            IconButton(onClick = {
+                expanded = !expanded
+            }, modifier = Modifier.padding(end = 8.dp)) {
+                Icon(
+                    modifier = Modifier.size(30.dp),
+                    painter = painterResource(id = R.drawable.baseline_more_horiz_24),
+                    contentDescription = "more"
+                )
+            }
+            if (expanded) {
+                DropdownMenu(
+                    expanded = true,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(id = R.string.download)) },
+                        onClick = {
+                            mainViewModel.downloadRawFile(
+                                context,
+                                audioRes,
+                                context.getString(songNameRes)
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                painterResource(id = R.drawable.ic_baseline_download_24),
+                                contentDescription = null
+                            )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(id = R.string.share)) },
+                        onClick = {
+                            mainViewModel.share(
+                                context = context,
+                                resourceId = audioRes,
+                                fileName = context.getString(songNameRes)
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                painterResource(id = R.drawable.ic_baseline_share_24),
+                                contentDescription = null
+                            )
+                        }
                     )
                 }
             }

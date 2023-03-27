@@ -7,7 +7,6 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zxcursedsoundboard.apk.BuildConfig
-import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
 import com.zxcursedsoundboard.apk.core.data.model.MediaItem
 import com.zxcursedsoundboard.apk.core.data.model.Song
@@ -31,49 +30,38 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
     private var mediaPlayer: MediaPlayer? = null
 
-    private var _currentPositionIndex = MutableStateFlow(-1)
+    private val _currentPositionIndex = MutableStateFlow(-1)
     val currentPositionIndex: StateFlow<Int> = _currentPositionIndex.asStateFlow()
 
-    private val _currentSong = MutableStateFlow(Song(-1, -1, -1))
+    private val _routeOfPlayingSong = MutableStateFlow("")
+    val routeOfPlayingSong = _routeOfPlayingSong.asStateFlow()
+
+    private val _currentSong = MutableStateFlow(Song(-1, -1, -1, -1))
     val currentSong: StateFlow<Song> = _currentSong.asStateFlow()
 
-    private var _duration = MutableStateFlow(0)
+    private val _duration = MutableStateFlow(0)
     val duration = _duration.asStateFlow()
 
-    private var _currentTimeMedia = MutableSharedFlow<Int>()
+    private val _currentTimeMedia = MutableSharedFlow<Int>()
     val currentTimeMedia: SharedFlow<Int> = _currentTimeMedia.asSharedFlow()
 
-    private var _looping = MutableStateFlow(false)
+    private val _looping = MutableStateFlow(false)
     val looping = _looping.asStateFlow()
 
     private val _downloadStatus = MutableSharedFlow<DownloadStatus>()
     val downloadStatus: SharedFlow<DownloadStatus> = _downloadStatus.asSharedFlow()
 
-    private var _isPlaying = MutableStateFlow(false)
+    private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
-    val mediaItemsMain = listOf(
-        MediaItem(R.raw.cursed2, R.string.pivo, R.string.zxcursed, R.drawable.pivo),
-        MediaItem(R.raw.cursed3, R.string.molchat, R.string.zxcursed, R.drawable.molchat),
-        MediaItem(R.raw.cursed4, R.string.traxat, R.string.zxcursed, R.drawable.traxat),
-        MediaItem(R.raw.cursed5, R.string.pikaper, R.string.zxcursed, R.drawable.pikaper),
-        MediaItem(R.raw.cursed6, R.string.sydalut, R.string.zxcursed, R.drawable.sydalut),
-        MediaItem(R.raw.cursed7, R.string.madmyazel, R.string.zxcursed, R.drawable.madmyazel),
-        MediaItem(R.raw.cursed8, R.string.chtoetoblyat, R.string.zxcursed, R.drawable.chtoetoblyat),
-        MediaItem(R.raw.cursed9, R.string.spasibo, R.string.zxcursed, R.drawable.spasibo),
-        MediaItem(R.raw.cursed10, R.string.denegnet, R.string.zxcursed, R.drawable.denegnet),
-        MediaItem(R.raw.cursed11, R.string.minuspivo, R.string.zxcursed, R.drawable.minuspivo),
-    )
-
+    private val _songList = MutableStateFlow<List<MediaItem>>(emptyList())
+    val songList = _songList.asStateFlow()
 
     fun downloadRawFile(context: Context, rawResId: Int, fileName: String) {
         viewModelScope.launch {
             _downloadStatus.emit(DownloadStatus.Loading)
-            val isSuccess = fileRepository.downloadRawFile(context, rawResId, fileName)
-            if (isSuccess) {
-                _downloadStatus.emit(DownloadStatus.Success)
-            } else {
-                _downloadStatus.emit(DownloadStatus.Error("Failed to save file"))
+            fileRepository.downloadRawFile(context, rawResId, fileName).collect {
+                _downloadStatus.emit(it)
             }
         }
     }
@@ -84,9 +72,13 @@ class MainViewModel @Inject constructor(
         songRes: Int,
         songName: Int,
         songAuthor: Int,
-        songImage: Int
+        songImage: Int,
+        listMedia: List<MediaItem>,
+        routeOfPlayingSong: String
     ) {
-        val song = Song(songAuthor, songName, songImage)
+        _routeOfPlayingSong.value = routeOfPlayingSong
+        _songList.value = listMedia
+        val song = Song(songAuthor, songName, songImage, songRes)
         _currentSong.value = song
         if (index == _currentPositionIndex.value && mediaPlayer != null) {
             togglePlayback()
@@ -102,7 +94,7 @@ class MainViewModel @Inject constructor(
                         if (_looping.value) {
                             media.start()
                         } else {
-                            playNextMedia(context)
+                            playNextMedia(context, mediaItemsMain = listMedia, routeOfPlayingSong)
                         }
                     }
                     setOnPreparedListener { media ->
@@ -115,7 +107,6 @@ class MainViewModel @Inject constructor(
         }
         updateCurrentTimePosition()
     }
-
 
     private fun togglePlayback() {
         if (mediaPlayer?.isPlaying == true) {
@@ -142,7 +133,8 @@ class MainViewModel @Inject constructor(
         _looping.value = !_looping.value
     }
 
-    fun playNextMedia(context: Context) {
+
+    fun playNextMedia(context: Context, mediaItemsMain: List<MediaItem>, currentRoute: String) {
         val nextIndex = (_currentPositionIndex.value + 1) % mediaItemsMain.size
         setMedia(
             nextIndex,
@@ -150,11 +142,13 @@ class MainViewModel @Inject constructor(
             mediaItemsMain[nextIndex].audioResId,
             mediaItemsMain[nextIndex].songNameRes,
             mediaItemsMain[nextIndex].songAuthor,
-            mediaItemsMain[nextIndex].imageRes
+            mediaItemsMain[nextIndex].imageRes,
+            mediaItemsMain,
+            currentRoute
         )
     }
 
-    fun playPreviousMedia(context: Context) {
+    fun playPreviousMedia(context: Context, mediaItemsMain: List<MediaItem>, currentRoute: String) {
         var newIndex = _currentPositionIndex.value - 1
         if (newIndex < 0) {
             newIndex = mediaItemsMain.size - 1
@@ -165,7 +159,9 @@ class MainViewModel @Inject constructor(
             mediaItemsMain[newIndex].audioResId,
             mediaItemsMain[newIndex].songNameRes,
             mediaItemsMain[newIndex].songAuthor,
-            mediaItemsMain[newIndex].imageRes
+            mediaItemsMain[newIndex].imageRes,
+            mediaItemsMain,
+            currentRoute
         )
     }
 

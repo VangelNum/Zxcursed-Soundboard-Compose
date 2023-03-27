@@ -10,15 +10,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Environment
-import android.util.Log
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.zxcursedsoundboard.apk.R
+import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
 import com.zxcursedsoundboard.apk.core.domain.repository.FileRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -29,7 +30,7 @@ class FileRepositoryImpl @Inject constructor() : FileRepository {
         context: Context,
         rawResId: Int,
         fileName: String
-    ): Boolean {
+    ): Flow<DownloadStatus> = flow {
         val hasWritePermission = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -41,23 +42,21 @@ class FileRepositoryImpl @Inject constructor() : FileRepository {
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 1
             )
-            Toast.makeText(context, context.getString(R.string.grand_permission), Toast.LENGTH_LONG)
-                .show()
+            emit(DownloadStatus.Error(context.getString(R.string.grand_permission)))
         }
 
         val storageDir =
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         if (!storageDir.exists()) {
             if (!storageDir.mkdirs()) {
-                Log.e("Tag", "Failed to create directory")
-                return false
+                emit(DownloadStatus.Error("Failed to create directory"))
             }
         }
 
         val file = File(storageDir, "$fileName.mp3")
         val inputStream = context.resources.openRawResource(rawResId)
 
-        return try {
+        try {
             val outputStream = withContext(Dispatchers.IO) {
                 FileOutputStream(file)
             }
@@ -67,10 +66,9 @@ class FileRepositoryImpl @Inject constructor() : FileRepository {
                 }
             }
             createDownloadCompleteNotification(context, fileName, file)
-            true
+            emit(DownloadStatus.Success)
         } catch (e: Exception) {
-            Log.e("Tag", "Failed to save file", e)
-            false
+            emit(DownloadStatus.Error(e.message.toString()))
         } finally {
             withContext(Dispatchers.IO) {
                 inputStream.close()

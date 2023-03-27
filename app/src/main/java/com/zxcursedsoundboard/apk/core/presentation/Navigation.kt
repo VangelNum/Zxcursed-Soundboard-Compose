@@ -44,13 +44,23 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.zxcursedsoundboard.apk.R
+import com.zxcursedsoundboard.apk.feature_Test.MediaControl
+import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteScreen
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
 import com.zxcursedsoundboard.apk.feature_main.presentation.ZxcursedMainScreen
+import com.zxcursedsoundboard.apk.feature_sounds_zxcursed.presentation.ZxcursedSoundScreen
 import com.zxcursedsoundboard.apk.feature_watch_media.presentation.WatchMediaScreen
 
+
+
+
+//startDestination: String = Screens.NavigationScreen.route,
+//favouriteViewModel: FavouriteViewModel = hiltViewModel(),
+//mainViewModel: MainViewModel = hiltViewModel()
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun Navigation(
+    startMedia:() -> Unit,
     startDestination: String = Screens.NavigationScreen.route,
     favouriteViewModel: FavouriteViewModel = hiltViewModel(),
     mainViewModel: MainViewModel = hiltViewModel()
@@ -64,6 +74,8 @@ fun Navigation(
     val duration = mainViewModel.duration.collectAsState()
     val currentTimeMedia = mainViewModel.currentTimeMedia.collectAsState(0)
     val looping = mainViewModel.looping.collectAsState()
+    val listOfMedia = mainViewModel.songList.collectAsState()
+    val routeOfPlayingSong = mainViewModel.routeOfPlayingSong.collectAsState()
 
     Scaffold(
         topBar = {
@@ -81,6 +93,9 @@ fun Navigation(
             startDestination = startDestination,
             modifier = Modifier.padding(it)
         ) {
+            composable(Screens.TestScreen.route) {
+                MediaControl(startMedia)
+            }
             composable(
                 Screens.WatchMediaScreen.route,
                 enterTransition = {
@@ -103,7 +118,9 @@ fun Navigation(
                     currentTimeMedia = currentTimeMedia.value,
                     looping = looping.value,
                     currentSong = currentSong.value,
-                    favouriteViewModel = favouriteViewModel
+                    listOfMedia = listOfMedia.value,
+                    favouriteViewModel = favouriteViewModel,
+                    routeOfPlayingSong = routeOfPlayingSong.value
                 )
             }
             composable(
@@ -141,12 +158,62 @@ fun Navigation(
                 },
             ) {
                 ZxcursedMainScreen(
-                    mainViewModel,
+                    mainViewModel = mainViewModel,
                     isPlaying = isPlaying.value,
-                    favouriteViewModel = favouriteViewModel
+                    favouriteViewModel = favouriteViewModel,
+                    currentDestination = currentDestination,
+                    routeOfPlayingSong = routeOfPlayingSong.value
+                )
+
+            }
+            composable(Screens.FavouriteScreen.route) {
+                FavouriteScreen(
+                    favouriteViewModel,
+                    mainViewModel,
+                    isPlaying.value,
+                    currentDestination,
+                    routeOfPlayingSong.value
                 )
             }
+            composable(
+                Screens.ZxcursedSoundScreen.route,
+                enterTransition = {
+                    when (initialState.destination.route) {
+                        Screens.WatchMediaScreen.route -> {
+                            null
+                        }
 
+                        else -> {
+                            slideIntoContainer(
+                                AnimatedContentScope.SlideDirection.Left,
+                                animationSpec = tween(700)
+                            )
+                        }
+                    }
+                },
+                exitTransition = {
+                    when (targetState.destination.route) {
+                        Screens.WatchMediaScreen.route -> {
+                            null
+                        }
+
+                        else -> {
+                            slideOutOfContainer(
+                                AnimatedContentScope.SlideDirection.Right,
+                                animationSpec = tween(700)
+                            )
+                        }
+                    }
+                },
+            ) {
+                ZxcursedSoundScreen(
+                    mainViewModel = mainViewModel,
+                    isPlaying = isPlaying.value,
+                    favouriteViewModel = favouriteViewModel,
+                    currentDestination = currentDestination,
+                    routeOfPlayingSong = routeOfPlayingSong.value
+                )
+            }
         }
         AnimatedVisibility(
             currentSong.value.author != -1 && currentDestination != Screens.WatchMediaScreen.route,

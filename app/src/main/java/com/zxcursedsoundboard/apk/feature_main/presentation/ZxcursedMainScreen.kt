@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
+import com.zxcursedsoundboard.apk.core.data.model.MediaItem
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
@@ -53,7 +54,9 @@ import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewMo
 fun ZxcursedMainScreen(
     mainViewModel: MainViewModel,
     isPlaying: Boolean?,
-    favouriteViewModel: FavouriteViewModel
+    favouriteViewModel: FavouriteViewModel,
+    currentDestination: String?,
+    routeOfPlayingSong: String,
 ) {
     val favouriteState = favouriteViewModel.favouriteState.collectAsState()
     val currentPosition = mainViewModel.currentPositionIndex.collectAsState()
@@ -84,13 +87,26 @@ fun ZxcursedMainScreen(
         }
     }
 
+    val mediaItemsMain = mutableListOf(
+        MediaItem(R.raw.cursed2, R.string.pivo, R.string.zxcursed, R.drawable.pivo),
+        MediaItem(R.raw.cursed3, R.string.molchat, R.string.zxcursed, R.drawable.molchat),
+        MediaItem(R.raw.cursed4, R.string.traxat, R.string.zxcursed, R.drawable.traxat),
+        MediaItem(R.raw.cursed6, R.string.sydalut, R.string.zxcursed, R.drawable.sydalut),
+        MediaItem(R.raw.cursed5, R.string.pikaper, R.string.zxcursed, R.drawable.pikaper),
+        MediaItem(R.raw.cursed7, R.string.madmyazel, R.string.zxcursed, R.drawable.madmyazel),
+        MediaItem(R.raw.cursed8, R.string.chtoetoblyat, R.string.zxcursed, R.drawable.chtoetoblyat),
+        MediaItem(R.raw.cursed9, R.string.spasibo, R.string.zxcursed, R.drawable.spasibo),
+        MediaItem(R.raw.cursed10, R.string.denegnet, R.string.zxcursed, R.drawable.denegnet),
+        MediaItem(R.raw.cursed11, R.string.minuspivo, R.string.zxcursed, R.drawable.minuspivo),
+    )
+
     var expandedIndex by remember { mutableStateOf(-1) }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 108.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        itemsIndexed(mainViewModel.mediaItemsMain) { index, item ->
+        itemsIndexed(mediaItemsMain) { index, item ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -101,7 +117,9 @@ fun ZxcursedMainScreen(
                             songRes = item.audioResId,
                             item.songNameRes,
                             item.songAuthor,
-                            item.imageRes
+                            item.imageRes,
+                            mediaItemsMain,
+                            currentDestination ?: ""
                         )
                     },
                 verticalAlignment = Alignment.CenterVertically
@@ -117,7 +135,7 @@ fun ZxcursedMainScreen(
                     }
                     //not work with standard AnimatedVisibility
                     androidx.compose.animation.AnimatedVisibility(
-                        index == currentPosition.value && isPlaying == true,
+                        index == currentPosition.value && isPlaying == true && routeOfPlayingSong == currentDestination,
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
@@ -139,20 +157,16 @@ fun ZxcursedMainScreen(
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
-                val songNameRes = context.getString(item.songNameRes)
-                val isFavourite =
-                    favouriteState.value.data?.toString()?.contains(songNameRes) ?: false
+                val isFavourite = favouriteState.value.data?.toString()?.contains(item.songNameRes.toString()) ?: false
                 IconButton(onClick = {
                     val song = FavouriteEntity(
-                        songName = songNameRes,
-                        songAuthor = context.getString(item.songAuthor),
+                        songName = item.songNameRes,
+                        songAuthor = item.songAuthor,
                         songImageRes = item.imageRes,
                         item.audioResId
-                        //songRes = mainViewModel.mediaItemsMain[index].audioResId,
-
                     )
                     if (isFavourite) {
-                        favouriteViewModel.deleteSong(songNameRes)
+                        favouriteViewModel.deleteSong(item.songNameRes)
                     } else {
                         favouriteViewModel.addSong(song)
                     }

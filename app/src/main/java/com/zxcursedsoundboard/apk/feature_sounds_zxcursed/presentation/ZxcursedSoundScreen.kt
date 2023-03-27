@@ -1,4 +1,4 @@
-package com.zxcursedsoundboard.apk.feature_favourite.presentation
+package com.zxcursedsoundboard.apk.feature_sounds_zxcursed.presentation
 
 import android.widget.Toast
 import androidx.compose.animation.fadeIn
@@ -19,9 +19,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -31,73 +30,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zxcursedsoundboard.apk.R
-import com.zxcursedsoundboard.apk.core.common.Resource
 import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
 import com.zxcursedsoundboard.apk.core.data.model.MediaItem
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
-import com.zxcursedsoundboard.apk.core.presentation.Screens
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
+import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
 
 @Composable
-fun FavouriteScreen(
-    favouriteViewModel: FavouriteViewModel,
+fun ZxcursedSoundScreen(
     mainViewModel: MainViewModel,
-    isPlaying: Boolean,
+    isPlaying: Boolean?,
+    favouriteViewModel: FavouriteViewModel,
     currentDestination: String?,
     routeOfPlayingSong: String
 ) {
-    val state = favouriteViewModel.favouriteState.collectAsState()
 
-    when (state.value) {
-        is Resource.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-
-        is Resource.Error -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = state.value.message.toString(), textAlign = TextAlign.Center)
-            }
-        }
-
-        is Resource.Success -> {
-            FavouriteItem(
-                items = state.value.data!!,
-                favouriteViewModel = favouriteViewModel,
-                mainViewModel = mainViewModel,
-                isPlaying = isPlaying,
-                currentDestination = currentDestination,
-                routeOfPlayingSong = routeOfPlayingSong
-            )
-        }
-    }
-}
-
-
-@Composable
-fun FavouriteItem(
-    items: List<FavouriteEntity>,
-    favouriteViewModel: FavouriteViewModel,
-    mainViewModel: MainViewModel,
-    isPlaying: Boolean,
-    currentDestination: String?,
-    routeOfPlayingSong: String
-) {
+    val favouriteState = favouriteViewModel.favouriteState.collectAsState()
     val currentPosition = mainViewModel.currentPositionIndex.collectAsState()
     val context = LocalContext.current
     LaunchedEffect(key1 = Unit) {
@@ -127,12 +90,26 @@ fun FavouriteItem(
     }
 
     var expandedIndex by remember { mutableStateOf(-1) }
+
+    val items = remember {
+        mutableStateListOf(
+            MediaItem(R.raw.cursed7, R.string.madmyazel, R.string.zxcursed, R.drawable.madmyazel),
+            MediaItem(
+                R.raw.cursed8,
+                R.string.chtoetoblyat,
+                R.string.zxcursed,
+                R.drawable.chtoetoblyat
+            ),
+        )
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 108.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        itemsIndexed(items) { index, mediaItem ->
+
+        itemsIndexed(items) { index, item ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -140,19 +117,12 @@ fun FavouriteItem(
                         mainViewModel.setMedia(
                             index,
                             context,
-                            mediaItem.songAudioRes,
-                            mediaItem.songName,
-                            mediaItem.songAuthor,
-                            mediaItem.songImageRes,
-                            items.map { entity ->
-                                MediaItem(
-                                    entity.songAudioRes,
-                                    entity.songName,
-                                    entity.songAuthor,
-                                    entity.songImageRes
-                                )
-                            },
-                            Screens.FavouriteScreen.route
+                            songRes = item.audioResId,
+                            item.songNameRes,
+                            item.songAuthor,
+                            item.imageRes,
+                            items,
+                            currentDestination ?: ""
                         )
                     },
                 verticalAlignment = Alignment.CenterVertically
@@ -160,7 +130,7 @@ fun FavouriteItem(
                 Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
                     Card(shape = RoundedCornerShape(16.dp), modifier = Modifier.size(64.dp)) {
                         Image(
-                            painter = painterResource(id = mediaItem.songImageRes),
+                            painter = painterResource(id = item.imageRes),
                             contentDescription = null,
                             modifier = Modifier.size(64.dp),
                             contentScale = ContentScale.Crop
@@ -168,7 +138,7 @@ fun FavouriteItem(
                     }
                     //not work with standard AnimatedVisibility
                     androidx.compose.animation.AnimatedVisibility(
-                        index == currentPosition.value && isPlaying && routeOfPlayingSong == currentDestination,
+                        index == currentPosition.value && isPlaying == true && routeOfPlayingSong == currentDestination,
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
@@ -182,29 +152,45 @@ fun FavouriteItem(
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(
-                        text = stringResource(id = mediaItem.songName),
+                        text = stringResource(id = item.songNameRes),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(text = stringResource(id = mediaItem.songAuthor), Modifier.alpha(0.5f))
+                    Text(text = stringResource(id = item.songAuthor), Modifier.alpha(0.5f))
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
+
+                val isFavourite =
+                    favouriteState.value.data?.toString()?.contains(item.songNameRes.toString())
+                        ?: false
                 IconButton(onClick = {
                     val song = FavouriteEntity(
-                        songName = mediaItem.songName,
-                        songAuthor = mediaItem.songAuthor,
-                        songImageRes = mediaItem.songImageRes,
-                        songAudioRes = mediaItem.songAudioRes
-
+                        songName = item.songNameRes,
+                        songAuthor = item.songAuthor,
+                        songImageRes = item.imageRes,
+                        item.audioResId
                     )
-                    favouriteViewModel.deleteSong(mediaItem.songName)
+                    if (isFavourite) {
+                        favouriteViewModel.deleteSong(item.songNameRes)
+                    } else {
+                        favouriteViewModel.addSong(song)
+                    }
                 }) {
-                    Icon(
-                        modifier = Modifier.size(30.dp),
-                        contentDescription = "delete",
-                        imageVector = Icons.Outlined.Close,
-                    )
+                    if (isFavourite) {
+                        Icon(
+                            tint = Color.Red,
+                            modifier = Modifier.size(30.dp),
+                            contentDescription = "favourite",
+                            imageVector = Icons.Outlined.Favorite,
+                        )
+                    } else {
+                        Icon(
+                            modifier = Modifier.size(30.dp),
+                            painter = painterResource(id = R.drawable.baseline_favorite_border_24),
+                            contentDescription = "favourite"
+                        )
+                    }
                 }
                 Box {
                     IconButton(onClick = {
@@ -226,8 +212,8 @@ fun FavouriteItem(
                                 onClick = {
                                     mainViewModel.downloadRawFile(
                                         context,
-                                        mediaItem.songAudioRes,
-                                        context.getString(mediaItem.songName)
+                                        item.audioResId,
+                                        context.getString(item.songNameRes)
                                     )
                                 },
                                 leadingIcon = {
@@ -242,8 +228,8 @@ fun FavouriteItem(
                                 onClick = {
                                     mainViewModel.share(
                                         context = context,
-                                        resourceId = mediaItem.songAudioRes,
-                                        fileName = context.getString(mediaItem.songName)
+                                        resourceId = item.audioResId,
+                                        fileName = context.getString(item.songNameRes)
                                     )
                                 },
                                 leadingIcon = {
@@ -259,4 +245,6 @@ fun FavouriteItem(
             }
         }
     }
+
+
 }

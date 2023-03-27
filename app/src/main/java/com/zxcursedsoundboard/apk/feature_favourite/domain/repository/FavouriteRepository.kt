@@ -7,5 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface FavouriteRepository {
     fun getAllSongs(): Flow<Resource<List<FavouriteEntity>>>
     suspend fun addSong(song: FavouriteEntity)
-    suspend fun deleteSong(songName: String)
+    suspend fun deleteSong(songName: Int)
 }

@@ -74,7 +74,7 @@ dependencies {
     //coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 
-
+    //animated navigation
     implementation "com.google.accompanist:accompanist-navigation-animation:0.30.0"
 //    //navigation
 //    def nav_version = "2.5.3"
@@ -97,4 +97,8 @@ dependencies {
 
     //viewModel
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
+
+    //media in notification area
+    implementation 'androidx.media:media:1.6.0'
+
 }
