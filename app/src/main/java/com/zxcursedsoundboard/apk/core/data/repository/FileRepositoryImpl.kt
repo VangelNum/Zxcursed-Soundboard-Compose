@@ -15,22 +15,18 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.zxcursedsoundboard.apk.R
-import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
 import com.zxcursedsoundboard.apk.core.domain.repository.FileRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 
 class FileRepositoryImpl @Inject constructor() : FileRepository {
-    override suspend fun downloadRawFile(
+    override fun downloadRawFile(
         context: Context,
         rawResId: Int,
         fileName: String
-    ): Flow<DownloadStatus> = flow {
+    ): Boolean {
+
         val hasWritePermission = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -42,37 +38,27 @@ class FileRepositoryImpl @Inject constructor() : FileRepository {
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 1
             )
-            emit(DownloadStatus.Error(context.getString(R.string.grand_permission)))
+            return false
         }
 
-        val storageDir =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        if (!storageDir.exists()) {
-            if (!storageDir.mkdirs()) {
-                emit(DownloadStatus.Error("Failed to create directory"))
-            }
-        }
-
-        val file = File(storageDir, "$fileName.mp3")
-        val inputStream = context.resources.openRawResource(rawResId)
-
-        try {
-            val outputStream = withContext(Dispatchers.IO) {
-                FileOutputStream(file)
-            }
+        val file = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            "${fileName}.mp3"
+        )
+        return try {
+            val inputStream = context.resources.openRawResource(rawResId)
+            val outputStream = FileOutputStream(
+                file
+            )
             inputStream.use { input ->
                 outputStream.use { output ->
                     input.copyTo(output)
                 }
             }
-            createDownloadCompleteNotification(context, fileName, file)
-            emit(DownloadStatus.Success)
+            createDownloadCompleteNotification(context, "${fileName}.mp3", file)
+            true
         } catch (e: Exception) {
-            emit(DownloadStatus.Error(e.message.toString()))
-        } finally {
-            withContext(Dispatchers.IO) {
-                inputStream.close()
-            }
+            false
         }
     }
 }

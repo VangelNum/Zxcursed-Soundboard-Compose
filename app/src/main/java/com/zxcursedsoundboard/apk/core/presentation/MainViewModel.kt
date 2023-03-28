@@ -58,10 +58,13 @@ class MainViewModel @Inject constructor(
     val songList = _songList.asStateFlow()
 
     fun downloadRawFile(context: Context, rawResId: Int, fileName: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Main) {
             _downloadStatus.emit(DownloadStatus.Loading)
-            fileRepository.downloadRawFile(context, rawResId, fileName).collect {
-                _downloadStatus.emit(it)
+            val isSuccess = fileRepository.downloadRawFile(context, rawResId, fileName)
+            if (isSuccess) {
+                _downloadStatus.emit(DownloadStatus.Success)
+            } else {
+                _downloadStatus.emit(DownloadStatus.Error("Error, file already exists or permission is required"))
             }
         }
     }
