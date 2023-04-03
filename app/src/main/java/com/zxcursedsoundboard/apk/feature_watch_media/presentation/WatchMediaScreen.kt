@@ -44,7 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zxcursedsoundboard.apk.R
-import com.zxcursedsoundboard.apk.core.data.model.MediaItem
+import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.core.data.model.Song
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
@@ -59,7 +59,7 @@ fun WatchMediaScreen(
     currentTimeMedia: Int,
     looping: Boolean,
     currentSong: Song,
-    listOfMedia: List<MediaItem>,
+    listOfMedia: List<MediaItems>,
     favouriteViewModel: FavouriteViewModel,
     routeOfPlayingSong: String
 ) {
@@ -179,6 +179,7 @@ fun WatchMediaScreen(
                 IconButton(onClick = {
                     favouriteViewModel.addSong(
                         FavouriteEntity(
+                            id = 0,
                             currentSong.name,
                             currentSong.author,
                             currentSong.image,

@@ -27,18 +27,21 @@ class FileRepositoryImpl @Inject constructor() : FileRepository {
         fileName: String
     ): Boolean {
 
-        val hasWritePermission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (!hasWritePermission) {
-            ActivityCompat.requestPermissions(
-                context as Activity,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                1
-            )
-            return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Unit
+        } else {
+            val hasWritePermission = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!hasWritePermission) {
+                ActivityCompat.requestPermissions(
+                    context as Activity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    1
+                )
+                return false
+            }
         }
 
         val file = File(

@@ -46,7 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
-import com.zxcursedsoundboard.apk.core.data.model.MediaItem
+import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
@@ -59,7 +59,6 @@ fun ZxcursedSoundScreen(
     currentDestination: String?,
     routeOfPlayingSong: String
 ) {
-
     val favouriteState = favouriteViewModel.favouriteState.collectAsState()
     val currentPosition = mainViewModel.currentPositionIndex.collectAsState()
     val context = LocalContext.current
@@ -73,7 +72,6 @@ fun ZxcursedSoundScreen(
                         Toast.LENGTH_LONG
                     ).show()
                 }
-
                 is DownloadStatus.Error -> {
                     Toast.makeText(
                         context,
@@ -81,7 +79,6 @@ fun ZxcursedSoundScreen(
                         Toast.LENGTH_LONG
                     ).show()
                 }
-
                 else -> {
                     Unit
                 }
@@ -93,8 +90,8 @@ fun ZxcursedSoundScreen(
 
     val items = remember {
         mutableStateListOf(
-            MediaItem(R.raw.cursed7, R.string.madmyazel, R.string.zxcursed, R.drawable.madmyazel),
-            MediaItem(
+            MediaItems(R.raw.cursed7, R.string.madmyazel, R.string.zxcursed, R.drawable.madmyazel),
+            MediaItems(
                 R.raw.cursed8,
                 R.string.chtoetoblyat,
                 R.string.zxcursed,
@@ -166,6 +163,7 @@ fun ZxcursedSoundScreen(
                         ?: false
                 IconButton(onClick = {
                     val song = FavouriteEntity(
+                        id=0,
                         songName = item.songNameRes,
                         songAuthor = item.songAuthor,
                         songImageRes = item.imageRes,

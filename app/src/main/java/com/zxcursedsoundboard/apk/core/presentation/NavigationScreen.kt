@@ -24,7 +24,6 @@ fun NavigationScreen(navController: NavHostController) {
         Screens.ZxcursedMainScreen,
         Screens.ZxcursedSoundScreen,
         Screens.FavouriteScreen,
-        Screens.TestScreen
     )
 
     LazyColumn(

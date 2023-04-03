@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zxcursedsoundboard.apk.BuildConfig
 import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
-import com.zxcursedsoundboard.apk.core.data.model.MediaItem
+import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.core.data.model.Song
 import com.zxcursedsoundboard.apk.core.domain.repository.FileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,20 +54,8 @@ class MainViewModel @Inject constructor(
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
-    private val _songList = MutableStateFlow<List<MediaItem>>(emptyList())
+    private val _songList = MutableStateFlow<List<MediaItems>>(emptyList())
     val songList = _songList.asStateFlow()
-
-    fun downloadRawFile(context: Context, rawResId: Int, fileName: String) {
-        viewModelScope.launch(Dispatchers.Main) {
-            _downloadStatus.emit(DownloadStatus.Loading)
-            val isSuccess = fileRepository.downloadRawFile(context, rawResId, fileName)
-            if (isSuccess) {
-                _downloadStatus.emit(DownloadStatus.Success)
-            } else {
-                _downloadStatus.emit(DownloadStatus.Error("Error, file already exists or permission is required"))
-            }
-        }
-    }
 
     fun setMedia(
         index: Int,
@@ -76,7 +64,7 @@ class MainViewModel @Inject constructor(
         songName: Int,
         songAuthor: Int,
         songImage: Int,
-        listMedia: List<MediaItem>,
+        listMedia: List<MediaItems>,
         routeOfPlayingSong: String
     ) {
         _routeOfPlayingSong.value = routeOfPlayingSong
@@ -113,11 +101,11 @@ class MainViewModel @Inject constructor(
 
     private fun togglePlayback() {
         if (mediaPlayer?.isPlaying == true) {
-            mediaPlayer?.pause()
             _isPlaying.value = false
+            mediaPlayer?.pause()
         } else {
-            mediaPlayer?.start()
             _isPlaying.value = true
+            mediaPlayer?.start()
         }
     }
 
@@ -137,7 +125,7 @@ class MainViewModel @Inject constructor(
     }
 
 
-    fun playNextMedia(context: Context, mediaItemsMain: List<MediaItem>, currentRoute: String) {
+    fun playNextMedia(context: Context, mediaItemsMain: List<MediaItems>, currentRoute: String) {
         val nextIndex = (_currentPositionIndex.value + 1) % mediaItemsMain.size
         setMedia(
             nextIndex,
@@ -151,7 +139,11 @@ class MainViewModel @Inject constructor(
         )
     }
 
-    fun playPreviousMedia(context: Context, mediaItemsMain: List<MediaItem>, currentRoute: String) {
+    fun playPreviousMedia(
+        context: Context,
+        mediaItemsMain: List<MediaItems>,
+        currentRoute: String
+    ) {
         var newIndex = _currentPositionIndex.value - 1
         if (newIndex < 0) {
             newIndex = mediaItemsMain.size - 1
@@ -212,4 +204,17 @@ class MainViewModel @Inject constructor(
         val chooser = Intent.createChooser(intent, "Share media file")
         context.startActivity(chooser)
     }
+
+    fun downloadRawFile(context: Context, rawResId: Int, fileName: String) {
+        viewModelScope.launch(Dispatchers.Main) {
+            _downloadStatus.emit(DownloadStatus.Loading)
+            val isSuccess = fileRepository.downloadRawFile(context, rawResId, fileName)
+            if (isSuccess) {
+                _downloadStatus.emit(DownloadStatus.Success)
+            } else {
+                _downloadStatus.emit(DownloadStatus.Error("Error, file already exists or permission is required"))
+            }
+        }
+    }
+
 }

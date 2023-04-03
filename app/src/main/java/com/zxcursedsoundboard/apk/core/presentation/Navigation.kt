@@ -34,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,7 +45,6 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.zxcursedsoundboard.apk.R
-import com.zxcursedsoundboard.apk.feature_Test.MediaControl
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteScreen
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
 import com.zxcursedsoundboard.apk.feature_main.presentation.ZxcursedMainScreen
@@ -52,15 +52,9 @@ import com.zxcursedsoundboard.apk.feature_sounds_zxcursed.presentation.ZxcursedS
 import com.zxcursedsoundboard.apk.feature_watch_media.presentation.WatchMediaScreen
 
 
-
-
-//startDestination: String = Screens.NavigationScreen.route,
-//favouriteViewModel: FavouriteViewModel = hiltViewModel(),
-//mainViewModel: MainViewModel = hiltViewModel()
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun Navigation(
-    startMedia:() -> Unit,
     startDestination: String = Screens.NavigationScreen.route,
     favouriteViewModel: FavouriteViewModel = hiltViewModel(),
     mainViewModel: MainViewModel = hiltViewModel()
@@ -68,7 +62,7 @@ fun Navigation(
     val navController: NavHostController = rememberAnimatedNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination?.route
-
+    val context = LocalContext.current
     val isPlaying = mainViewModel.isPlaying.collectAsState()
     val currentSong = mainViewModel.currentSong.collectAsState()
     val duration = mainViewModel.duration.collectAsState()
@@ -93,9 +87,6 @@ fun Navigation(
             startDestination = startDestination,
             modifier = Modifier.padding(it)
         ) {
-            composable(Screens.TestScreen.route) {
-                MediaControl(startMedia)
-            }
             composable(
                 Screens.WatchMediaScreen.route,
                 enterTransition = {
@@ -251,6 +242,7 @@ fun Navigation(
                             Text(text = stringResource(id = currentSong.value.author))
                         }
                         Spacer(modifier = Modifier.weight(1f))
+
                         if (isPlaying.value) {
                             IconButton(onClick = { mainViewModel.pause() }) {
                                 Icon(
@@ -261,12 +253,25 @@ fun Navigation(
                         } else {
                             IconButton(onClick = { mainViewModel.play() }) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.outline_play_arrow_24),
+                                    painter = painterResource(id = R.drawable.baseline_play_arrow_24),
                                     contentDescription = "play"
                                 )
                             }
                         }
+                        IconButton(onClick = {
+                            mainViewModel.playNextMedia(
+                                context,
+                                mainViewModel.songList.value,
+                                routeOfPlayingSong.value
+                            )
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_skip_next_24),
+                                contentDescription = "pause"
+                            )
+                        }
                     }
+
                 }
             }
         }

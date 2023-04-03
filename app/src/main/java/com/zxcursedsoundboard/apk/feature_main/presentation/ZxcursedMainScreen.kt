@@ -45,7 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
-import com.zxcursedsoundboard.apk.core.data.model.MediaItem
+import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
@@ -61,6 +61,7 @@ fun ZxcursedMainScreen(
     val favouriteState = favouriteViewModel.favouriteState.collectAsState()
     val currentPosition = mainViewModel.currentPositionIndex.collectAsState()
     val context = LocalContext.current
+
     LaunchedEffect(key1 = Unit) {
         mainViewModel.downloadStatus.collect { downloadStatus ->
             when (downloadStatus) {
@@ -88,16 +89,40 @@ fun ZxcursedMainScreen(
     }
 
     val mediaItemsMain = mutableListOf(
-        MediaItem(R.raw.cursed2, R.string.pivo, R.string.zxcursed, R.drawable.pivo),
-        MediaItem(R.raw.cursed3, R.string.molchat, R.string.zxcursed, R.drawable.molchat),
-        MediaItem(R.raw.cursed4, R.string.traxat, R.string.zxcursed, R.drawable.traxat),
-        MediaItem(R.raw.cursed6, R.string.sydalut, R.string.zxcursed, R.drawable.sydalut),
-        MediaItem(R.raw.cursed5, R.string.pikaper, R.string.zxcursed, R.drawable.pikaper),
-        MediaItem(R.raw.cursed7, R.string.madmyazel, R.string.zxcursed, R.drawable.madmyazel),
-        MediaItem(R.raw.cursed8, R.string.chtoetoblyat, R.string.zxcursed, R.drawable.chtoetoblyat),
-        MediaItem(R.raw.cursed9, R.string.spasibo, R.string.zxcursed, R.drawable.spasibo),
-        MediaItem(R.raw.cursed10, R.string.denegnet, R.string.zxcursed, R.drawable.denegnet),
-        MediaItem(R.raw.cursed11, R.string.minuspivo, R.string.zxcursed, R.drawable.minuspivo),
+        MediaItems(R.raw.cursed2, R.string.pivo, R.string.zxcursed, R.drawable.pivo),
+        MediaItems(R.raw.cursed3, R.string.molchat, R.string.zxcursed, R.drawable.molchat),
+        MediaItems(R.raw.cursed4, R.string.traxat, R.string.zxcursed, R.drawable.traxat),
+        MediaItems(R.raw.cursed6, R.string.sydalut, R.string.zxcursed, R.drawable.sydalut),
+        MediaItems(R.raw.cursed5, R.string.pikaper, R.string.zxcursed, R.drawable.pikaper),
+        MediaItems(R.raw.cursed7, R.string.madmyazel, R.string.zxcursed, R.drawable.madmyazel),
+        MediaItems(
+            R.raw.cursed8,
+            R.string.chtoetoblyat,
+            R.string.zxcursed,
+            R.drawable.chtoetoblyat
+        ),
+        MediaItems(R.raw.cursed9, R.string.spasibo, R.string.zxcursed, R.drawable.spasibo),
+        MediaItems(R.raw.cursed10, R.string.denegnet, R.string.zxcursed, R.drawable.denegnet),
+        MediaItems(R.raw.cursed11, R.string.minuspivo, R.string.zxcursed, R.drawable.minuspivo),
+
+        MediaItems(R.raw.cursed14, R.string.anekdot, R.string.zxcursed, R.drawable.anekdot),
+        MediaItems(R.raw.cursed15, R.string.dirkavsire, R.string.zxcursed, R.drawable.dirkavsire),
+        MediaItems(R.raw.cursed16, R.string.buyback, R.string.zxcursed, R.drawable.buyback),
+        MediaItems(R.raw.cursed24, R.string.kvakvakva, R.string.zxcursed, R.drawable.kvakvakva),
+        MediaItems(R.raw.cursed35, R.string._0_10, R.string.zxcursed, R.drawable._0_10),
+        MediaItems(R.raw.cursed36, R.string.mamont, R.string.zxcursed, R.drawable.mamont),
+        MediaItems(R.raw.cursed37, R.string.gerichabi, R.string.zxcursed, R.drawable.gerichabi),
+        MediaItems(R.raw.cursed38, R.string.jenarojala, R.string.zxcursed, R.drawable.jenarojala),
+        MediaItems(R.raw.cursed39, R.string.onrad, R.string.zxcursed, R.drawable.onrad),
+        MediaItems(R.raw.cursed40, R.string.worstsf, R.string.zxcursed, R.drawable.minuspivo),
+        MediaItems(R.raw.cursed42, R.string.fivestar, R.string.zxcursed, R.drawable.minuspivo),
+        MediaItems(R.raw.cursed41, R.string.dumaldendi, R.string.zxcursed, R.drawable.minuspivo),
+        MediaItems(R.raw.cursed76, R.string.boje, R.string.zxcursed, R.drawable.minuspivo),
+        MediaItems(R.raw.cursed77, R.string.osujdau, R.string.zxcursed, R.drawable.minuspivo),
+        MediaItems(R.raw.cursed78, R.string.ofau, R.string.zxcursed, R.drawable.minuspivo),
+        MediaItems(R.raw.cursed79, R.string.zerozriteley, R.string.zxcursed, R.drawable.minuspivo),
+        MediaItems(R.raw.cursed80, R.string.zavaliebalo, R.string.zxcursed, R.drawable.minuspivo),
+        MediaItems(R.raw.cursed81, R.string.razban, R.string.zxcursed, R.drawable.minuspivo),
     )
 
     var expandedIndex by remember { mutableStateOf(-1) }
@@ -157,9 +182,12 @@ fun ZxcursedMainScreen(
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
-                val isFavourite = favouriteState.value.data?.toString()?.contains(item.songNameRes.toString()) ?: false
+                val isFavourite =
+                    favouriteState.value.data?.toString()?.contains(item.songNameRes.toString())
+                        ?: false
                 IconButton(onClick = {
                     val song = FavouriteEntity(
+                        id = 0,
                         songName = item.songNameRes,
                         songAuthor = item.songAuthor,
                         songImageRes = item.imageRes,
