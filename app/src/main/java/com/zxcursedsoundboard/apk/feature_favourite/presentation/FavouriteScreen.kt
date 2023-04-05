@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,13 +44,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.SubcomposeAsyncImage
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.Resource
 import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
-import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.core.presentation.Screens
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
+import com.zxcursedsoundboard.apk.feature_test.ItemsFirebase
 
 @Composable
 fun FavouriteScreen(
@@ -146,28 +146,27 @@ fun FavouriteItem(
                         .clickable {
                             mainViewModel.setMedia(
                                 index,
-                                context,
                                 mediaItem.songAudioRes,
                                 mediaItem.songName,
                                 mediaItem.songAuthor,
                                 mediaItem.songImageRes,
+                                Screens.FavouriteScreen.route,
                                 items.map { entity ->
-                                    MediaItems(
+                                    ItemsFirebase(
                                         entity.songAudioRes,
                                         entity.songName,
                                         entity.songAuthor,
                                         entity.songImageRes
                                     )
                                 },
-                                Screens.FavouriteScreen.route
                             )
                         },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
                         Card(shape = RoundedCornerShape(16.dp), modifier = Modifier.size(64.dp)) {
-                            Image(
-                                painter = painterResource(id = mediaItem.songImageRes),
+                            SubcomposeAsyncImage(
+                                model = mediaItem.songImageRes,
                                 contentDescription = null,
                                 modifier = Modifier.size(64.dp),
                                 contentScale = ContentScale.Crop
@@ -189,11 +188,11 @@ fun FavouriteItem(
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
                         Text(
-                            text = stringResource(id = mediaItem.songName),
+                            text = mediaItem.songName,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                        Text(text = stringResource(id = mediaItem.songAuthor), Modifier.alpha(0.5f))
+                        Text(mediaItem.songAuthor, Modifier.alpha(0.5f))
                     }
                     Spacer(modifier = Modifier.weight(1f))
 
@@ -231,11 +230,11 @@ fun FavouriteItem(
                                 DropdownMenuItem(
                                     text = { Text(text = stringResource(id = R.string.download)) },
                                     onClick = {
-                                        mainViewModel.downloadRawFile(
-                                            context,
-                                            mediaItem.songAudioRes,
-                                            context.getString(mediaItem.songName)
-                                        )
+//                                        mainViewModel.downloadRawFile(
+//                                            context,
+//                                            mediaItem.songAudioRes,
+//                                            context.getString(mediaItem.songName)
+//                                        )
                                     },
                                     leadingIcon = {
                                         Icon(
@@ -247,11 +246,11 @@ fun FavouriteItem(
                                 DropdownMenuItem(
                                     text = { Text(text = stringResource(id = R.string.share)) },
                                     onClick = {
-                                        mainViewModel.share(
-                                            context = context,
-                                            resourceId = mediaItem.songAudioRes,
-                                            fileName = context.getString(mediaItem.songName)
-                                        )
+//                                        mainViewModel.share(
+//                                            context = context,
+//                                            resourceId = mediaItem.songAudioRes,
+//                                            fileName = context.getString(mediaItem.songName)
+//                                        )
                                     },
                                     leadingIcon = {
                                         Icon(

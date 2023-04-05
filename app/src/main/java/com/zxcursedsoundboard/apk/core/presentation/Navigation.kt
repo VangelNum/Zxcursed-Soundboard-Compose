@@ -6,7 +6,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,17 +29,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import coil.compose.SubcomposeAsyncImage
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -49,6 +47,7 @@ import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteScreen
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
 import com.zxcursedsoundboard.apk.feature_main.presentation.ZxcursedMainScreen
 import com.zxcursedsoundboard.apk.feature_sounds_zxcursed.presentation.ZxcursedSoundScreen
+import com.zxcursedsoundboard.apk.feature_test.TestScreen
 import com.zxcursedsoundboard.apk.feature_watch_media.presentation.WatchMediaScreen
 
 
@@ -62,14 +61,14 @@ fun Navigation(
     val navController: NavHostController = rememberAnimatedNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination?.route
-    val context = LocalContext.current
-    val isPlaying = mainViewModel.isPlaying.collectAsState()
-    val currentSong = mainViewModel.currentSong.collectAsState()
-    val duration = mainViewModel.duration.collectAsState()
-    val currentTimeMedia = mainViewModel.currentTimeMedia.collectAsState(0)
-    val looping = mainViewModel.looping.collectAsState()
-    val listOfMedia = mainViewModel.songList.collectAsState()
-    val routeOfPlayingSong = mainViewModel.routeOfPlayingSong.collectAsState()
+
+    val isPlaying = mainViewModel.isPlaying.collectAsStateWithLifecycle()
+    val routeOfPlayingSong = mainViewModel.routeOfPlayingSong.collectAsStateWithLifecycle()
+    val currentSong = mainViewModel.currentSong.collectAsStateWithLifecycle()
+    val duration = mainViewModel.duration.collectAsStateWithLifecycle()
+    val currentTimeMedia = mainViewModel.currentTimeMedia.collectAsStateWithLifecycle(0)
+    val looping = mainViewModel.looping.collectAsStateWithLifecycle()
+    val listOfMedia = mainViewModel.songList.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -166,6 +165,9 @@ fun Navigation(
                     routeOfPlayingSong.value
                 )
             }
+            composable(Screens.TestScreen.route) {
+                TestScreen()
+            }
             composable(
                 Screens.ZxcursedSoundScreen.route,
                 enterTransition = {
@@ -207,7 +209,7 @@ fun Navigation(
             }
         }
         AnimatedVisibility(
-            currentSong.value.author != -1 && currentDestination != Screens.WatchMediaScreen.route,
+            currentSong.value.author != "" && currentDestination != Screens.WatchMediaScreen.route,
             enter = slideInVertically(
                 initialOffsetY = { it },
                 animationSpec = tween(durationMillis = 400)
@@ -231,15 +233,15 @@ fun Navigation(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Card {
-                            Image(
-                                painter = painterResource(id = currentSong.value.image),
+                            SubcomposeAsyncImage(
+                                model = currentSong.value.image,
                                 contentDescription = null,
                                 modifier = Modifier.size(60.dp)
                             )
                         }
                         Column {
-                            Text(text = stringResource(id = currentSong.value.name))
-                            Text(text = stringResource(id = currentSong.value.author))
+                            Text(text = currentSong.value.name)
+                            Text(text = currentSong.value.author)
                         }
                         Spacer(modifier = Modifier.weight(1f))
 
@@ -260,7 +262,6 @@ fun Navigation(
                         }
                         IconButton(onClick = {
                             mainViewModel.playNextMedia(
-                                context,
                                 mainViewModel.songList.value,
                                 routeOfPlayingSong.value
                             )
@@ -277,3 +278,4 @@ fun Navigation(
         }
     }
 }
+

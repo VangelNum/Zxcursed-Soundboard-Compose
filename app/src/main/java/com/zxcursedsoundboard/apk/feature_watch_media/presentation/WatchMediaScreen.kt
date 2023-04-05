@@ -1,7 +1,6 @@
 package com.zxcursedsoundboard.apk.feature_watch_media.presentation
 
 import android.content.Context
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,12 +42,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.compose.SubcomposeAsyncImage
 import com.zxcursedsoundboard.apk.R
-import com.zxcursedsoundboard.apk.core.data.model.MediaItems
-import com.zxcursedsoundboard.apk.core.data.model.Song
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
+import com.zxcursedsoundboard.apk.feature_test.ItemsFirebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,8 +57,8 @@ fun WatchMediaScreen(
     duration: Int,
     currentTimeMedia: Int,
     looping: Boolean,
-    currentSong: Song,
-    listOfMedia: List<MediaItems>,
+    currentSong: ItemsFirebase,
+    listOfMedia: List<ItemsFirebase>,
     favouriteViewModel: FavouriteViewModel,
     routeOfPlayingSong: String
 ) {
@@ -84,7 +83,7 @@ fun WatchMediaScreen(
             currentSong.image,
             mainViewModel,
             context,
-            currentSong.mediaRes,
+            currentSong.author,
             currentSong.name
         )
         Spacer(modifier = Modifier.height(4.dp))
@@ -128,7 +127,7 @@ fun WatchMediaScreen(
                 )
             }
             IconButton(onClick = {
-                mainViewModel.playPreviousMedia(context, listOfMedia, routeOfPlayingSong)
+                mainViewModel.playPreviousMedia(listOfMedia, routeOfPlayingSong)
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_skip_previous_24),
@@ -154,7 +153,7 @@ fun WatchMediaScreen(
                 }
             }
             IconButton(onClick = {
-                mainViewModel.playNextMedia(context, listOfMedia, routeOfPlayingSong)
+                mainViewModel.playNextMedia(listOfMedia, routeOfPlayingSong)
             })
             {
                 Icon(
@@ -165,7 +164,7 @@ fun WatchMediaScreen(
             }
             if (isFavourite) {
                 IconButton(onClick = {
-                    favouriteViewModel.deleteSong(currentSong.name)
+//                    favouriteViewModel.deleteSong(currentSong.name)
                     isFavourite = false
                 }) {
                     Icon(
@@ -183,7 +182,7 @@ fun WatchMediaScreen(
                             currentSong.name,
                             currentSong.author,
                             currentSong.image,
-                            currentSong.mediaRes
+                            currentSong.audio
                         )
                     )
                     isFavourite = true
@@ -200,14 +199,14 @@ fun WatchMediaScreen(
 }
 
 @Composable
-fun AuthorAndTitleItem(name: Int, author: Int) {
+fun AuthorAndTitleItem(name: String, author: String) {
     Text(
         modifier = Modifier.padding(start = 4.dp),
-        text = stringResource(id = name),
+        text = name,
         style = MaterialTheme.typography.titleMedium
     )
     Text(
-        text = stringResource(id = author),
+        text = author,
         style = MaterialTheme.typography.titleMedium,
         modifier = Modifier
             .alpha(0.5f)
@@ -217,11 +216,11 @@ fun AuthorAndTitleItem(name: Int, author: Int) {
 
 @Composable
 fun CardItem(
-    image: Int,
+    image: String,
     mainViewModel: MainViewModel,
     context: Context,
-    audioRes: Int,
-    songNameRes: Int
+    audioRes: String,
+    songNameRes: String
 ) {
     var expanded by remember {
         mutableStateOf(false)
@@ -232,8 +231,8 @@ fun CardItem(
             .fillMaxHeight(0.5f), contentAlignment = Alignment.BottomEnd
     ) {
         Card(shape = MaterialTheme.shapes.extraLarge) {
-            Image(
-                painter = painterResource(id = image),
+            SubcomposeAsyncImage(
+                model = image,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -258,11 +257,11 @@ fun CardItem(
                     DropdownMenuItem(
                         text = { Text(text = stringResource(id = R.string.download)) },
                         onClick = {
-                            mainViewModel.downloadRawFile(
-                                context,
-                                audioRes,
-                                context.getString(songNameRes)
-                            )
+//                            mainViewModel.downloadRawFile(
+//                                context,
+//                                audioRes,
+//                                context.getString(songNameRes)
+//                            )
                         },
                         leadingIcon = {
                             Icon(
@@ -274,11 +273,11 @@ fun CardItem(
                     DropdownMenuItem(
                         text = { Text(text = stringResource(id = R.string.share)) },
                         onClick = {
-                            mainViewModel.share(
-                                context = context,
-                                resourceId = audioRes,
-                                fileName = context.getString(songNameRes)
-                            )
+//                            mainViewModel.share(
+//                                context = context,
+//                                resourceId = audioRes,
+//                                fileName = context.getString(songNameRes)
+//                            )
                         },
                         leadingIcon = {
                             Icon(

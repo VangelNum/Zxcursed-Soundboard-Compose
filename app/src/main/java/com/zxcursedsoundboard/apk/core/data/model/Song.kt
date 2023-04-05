@@ -6,3 +6,4 @@ data class Song(
     val image: Int,
     val mediaRes: Int
 )
+

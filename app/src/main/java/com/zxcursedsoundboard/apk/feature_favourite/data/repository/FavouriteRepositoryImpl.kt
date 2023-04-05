@@ -28,7 +28,7 @@ class FavouriteRepositoryImpl @Inject constructor(
         dao.addSong(song)
     }
 
-    override suspend fun deleteSong(songName: Int) {
+    override suspend fun deleteSong(songName: String) {
         dao.deleteSong(songName)
     }
 }

@@ -38,7 +38,7 @@ class FavouriteViewModel @Inject constructor(
         }
     }
 
-    fun deleteSong(songName: Int) {
+    fun deleteSong(songName: String) {
         viewModelScope.launch {
             repository.deleteSong(songName)
         }

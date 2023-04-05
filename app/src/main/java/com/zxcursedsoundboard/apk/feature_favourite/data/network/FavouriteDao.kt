@@ -14,7 +14,7 @@ interface FavouriteDao {
     fun getAll(): Flow<List<FavouriteEntity>>
 
     @Query ("DELETE FROM favourite_table WHERE songName = :song")
-    suspend fun deleteSong(song: Int)
+    suspend fun deleteSong(song: String)
 
     @Insert(onConflict = IGNORE)
     suspend fun addSong(song: FavouriteEntity)
