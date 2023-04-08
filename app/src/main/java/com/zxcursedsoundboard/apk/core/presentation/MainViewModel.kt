@@ -2,10 +2,13 @@ package com.zxcursedsoundboard.apk.core.presentation
 
 import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.PlaybackException
+import com.google.android.exoplayer2.Player
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.zxcursedsoundboard.apk.BuildConfig
@@ -15,6 +18,7 @@ import com.zxcursedsoundboard.apk.core.domain.repository.FileRepository
 import com.zxcursedsoundboard.apk.feature_test.ItemsFirebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -32,8 +36,6 @@ class MainViewModel @Inject constructor(
     private val fileRepository: FileRepository,
 ) : ViewModel() {
 
-    private var mediaPlayer: MediaPlayer? = null
-
     private val _currentPositionIndex = MutableStateFlow(-1)
     val currentPositionIndex: StateFlow<Int> = _currentPositionIndex.asStateFlow()
 
@@ -43,11 +45,11 @@ class MainViewModel @Inject constructor(
     private val _currentSong = MutableStateFlow(ItemsFirebase("", "", "", ""))
     val currentSong: StateFlow<ItemsFirebase> = _currentSong.asStateFlow()
 
-    private val _duration = MutableStateFlow(0)
+    private val _duration = MutableStateFlow(0L)
     val duration = _duration.asStateFlow()
 
-    private val _currentTimeMedia = MutableSharedFlow<Int>(0)
-    val currentTimeMedia: SharedFlow<Int> = _currentTimeMedia.asSharedFlow()
+    private val _currentTimeMedia = MutableSharedFlow<Long>()
+    val currentTimeMedia: SharedFlow<Long> = _currentTimeMedia.asSharedFlow()
 
     private val _looping = MutableStateFlow(false)
     val looping = _looping.asStateFlow()
@@ -101,6 +103,8 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private var player: ExoPlayer? = null
+
     fun setMedia(
         index: Int,
         songRes: String,
@@ -108,71 +112,83 @@ class MainViewModel @Inject constructor(
         songAuthor: String,
         songImage: String,
         routeOfPlayingSong: String,
-        songList: List<ItemsFirebase>
+        songList: List<ItemsFirebase>,
+        context: Context
     ) {
         _songList.value = songList
-        val song = ItemsFirebase(songAuthor, songName, songImage, songRes)
-        _currentSong.value = song
-        if (index == _currentPositionIndex.value && mediaPlayer != null && _routeOfPlayingSong.value == routeOfPlayingSong) {
+        val mediaItem = MediaItem.fromUri(songRes)
+        _currentSong.value = ItemsFirebase(songAuthor, songName, songImage, songRes)
+        if (index == _currentPositionIndex.value && player != null && _routeOfPlayingSong.value == routeOfPlayingSong) {
             togglePlayback()
         } else {
-            mediaPlayer?.let {
+            player?.let {
                 it.stop()
                 it.release()
             }
-            mediaPlayer = MediaPlayer().apply {
-                reset()
-                setDataSource(songRes)
-                prepareAsync()
-                setOnCompletionListener { media ->
-                    if (_looping.value) {
-                        media.start()
-                    } else {
-                        val nextIndex = index + 1
-                        if (nextIndex < songList.size) {
-                            val nextMediaItem = songList[nextIndex]
-                            setMedia(
-                                nextIndex,
-                                nextMediaItem.audio,
-                                nextMediaItem.name,
-                                nextMediaItem.author,
-                                nextMediaItem.image,
-                                routeOfPlayingSong,
-                                songList
-                            )
-                        } else {
-                            _isPlaying.value = false
+            player = ExoPlayer.Builder(context).build().apply {
+                setMediaItem(mediaItem)
+                prepare()
+                play()
+                addListener(object : Player.Listener {
+                    override fun onPlaybackStateChanged(state: Int) {
+                        if (state == Player.STATE_READY || state == Player.STATE_BUFFERING) {
+                            _isPlaying.value = true
+                            _currentPositionIndex.value = index
+                            _duration.value = player?.duration ?: 0
+                        }
+                        if (state == Player.STATE_ENDED) {
+                            if (_looping.value) {
+                                player?.seekTo(0)
+                                player?.play()
+                            } else {
+                                val nextIndex = index + 1
+                                if (nextIndex < songList.size) {
+                                    val nextMediaItem = songList[nextIndex]
+                                    setMedia(
+                                        nextIndex,
+                                        nextMediaItem.audio,
+                                        nextMediaItem.name,
+                                        nextMediaItem.author,
+                                        nextMediaItem.image,
+                                        routeOfPlayingSong,
+                                        songList,
+                                        context
+                                    )
+                                } else {
+                                    _isPlaying.value = false
+                                }
+                            }
                         }
                     }
-                }
-                setOnPreparedListener { media ->
-                    media.start()
-                    _isPlaying.value = true
-                    _currentPositionIndex.value = index
-                    _duration.value = media.duration
-                }
+
+                    override fun onPlayerError(error: PlaybackException) {
+                        _isPlaying.value = false
+                    }
+
+                    override fun onIsPlayingChanged(isPlaying: Boolean) {
+                        viewModelScope.launch(Dispatchers.Main) {
+                            while (isPlaying) {
+                                val currentPosition = player?.currentPosition ?: 0
+                                _currentTimeMedia.emit(currentPosition)
+                                delay(16)
+                            }
+                        }
+                    }
+                })
+
             }
         }
         _routeOfPlayingSong.value = routeOfPlayingSong
-        updateCurrentTimePosition()
     }
+
 
     private fun togglePlayback() {
-        if (mediaPlayer!!.isPlaying) {
-            mediaPlayer!!.pause()
+        if (player!!.isPlaying) {
+            player!!.pause()
             _isPlaying.value = false
         } else {
-            mediaPlayer!!.start()
+            player!!.play()
             _isPlaying.value = true
-        }
-    }
-
-    private fun updateCurrentTimePosition() {
-        viewModelScope.launch(Dispatchers.IO) {
-            while (_isPlaying.value) {
-                val currentPosition = mediaPlayer?.currentPosition ?: 0
-                _currentTimeMedia.emit(currentPosition)
-            }
         }
     }
 
@@ -180,7 +196,7 @@ class MainViewModel @Inject constructor(
         _looping.value = !_looping.value
     }
 
-    fun playNextMedia(songList: List<ItemsFirebase>, currentRoute: String) {
+    fun playNextMedia(songList: List<ItemsFirebase>, currentRoute: String, context: Context) {
         val nextIndex = (_currentPositionIndex.value + 1) % songList.size
         setMedia(
             nextIndex,
@@ -189,13 +205,15 @@ class MainViewModel @Inject constructor(
             songList[nextIndex].author,
             songList[nextIndex].image,
             currentRoute,
-            songList
+            songList,
+            context
         )
     }
 
     fun playPreviousMedia(
         songList: List<ItemsFirebase>,
-        currentRoute: String
+        currentRoute: String,
+        context: Context
     ) {
         var newIndex = _currentPositionIndex.value - 1
         if (newIndex < 0) {
@@ -208,30 +226,27 @@ class MainViewModel @Inject constructor(
             songList[newIndex].author,
             songList[newIndex].image,
             currentRoute,
-            songList
+            songList,
+            context
         )
     }
 
-    fun setCurrentTime(position: Int) {
-        mediaPlayer?.seekTo(position)
-        viewModelScope.launch(Dispatchers.Main) {
-            _currentTimeMedia.emit(position)
-        }
+    fun setCurrentTime(position: Long) {
+        player?.seekTo(position)
+        player?.play()
     }
 
     fun play() {
         togglePlayback()
-        updateCurrentTimePosition()
     }
 
     fun pause() {
         togglePlayback()
-        updateCurrentTimePosition()
     }
 
     override fun onCleared() {
         super.onCleared()
-        mediaPlayer?.release()
+        player?.release()
     }
 
     fun share(context: Context, resourceId: Int, fileName: String) {

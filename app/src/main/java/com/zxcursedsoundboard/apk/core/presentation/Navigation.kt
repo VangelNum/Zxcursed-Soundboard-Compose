@@ -28,9 +28,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -65,10 +67,10 @@ fun Navigation(
     val routeOfPlayingSong = mainViewModel.routeOfPlayingSong.collectAsStateWithLifecycle()
     val currentSong = mainViewModel.currentSong.collectAsStateWithLifecycle()
     val duration = mainViewModel.duration.collectAsStateWithLifecycle()
-    val currentTimeMedia = mainViewModel.currentTimeMedia.collectAsStateWithLifecycle(0)
+    val currentTimeMedia = mainViewModel.currentTimeMedia.collectAsState(0L)
     val looping = mainViewModel.looping.collectAsStateWithLifecycle()
     val listOfMedia = mainViewModel.songList.collectAsStateWithLifecycle()
-
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
@@ -257,7 +259,8 @@ fun Navigation(
                         IconButton(onClick = {
                             mainViewModel.playNextMedia(
                                 mainViewModel.songList.value,
-                                routeOfPlayingSong.value
+                                routeOfPlayingSong.value,
+                                context
                             )
                         }) {
                             Icon(

@@ -158,6 +158,7 @@ fun FavouriteItem(
                                         audio = entity.songAudioRes
                                     )
                                 },
+                                context
                             )
                         },
                     verticalAlignment = Alignment.CenterVertically

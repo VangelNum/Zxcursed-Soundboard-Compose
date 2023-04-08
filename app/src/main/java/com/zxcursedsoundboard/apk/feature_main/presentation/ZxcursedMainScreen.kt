@@ -178,7 +178,8 @@ fun ZxcursedMainScreen(
                                     songAuthor = item.author,
                                     songImage = item.image,
                                     routeOfPlayingSong = currentDestination ?: "",
-                                    songList = mediaItemsMain.value.data!!
+                                    songList = mediaItemsMain.value.data!!,
+                                    context = context
                                 )
                             },
                         verticalAlignment = Alignment.CenterVertically

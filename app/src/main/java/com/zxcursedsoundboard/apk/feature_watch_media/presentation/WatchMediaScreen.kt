@@ -54,8 +54,8 @@ import com.zxcursedsoundboard.apk.feature_test.ItemsFirebase
 fun WatchMediaScreen(
     mainViewModel: MainViewModel,
     isPlaying: Boolean,
-    duration: Int,
-    currentTimeMedia: Int,
+    duration: Long,
+    currentTimeMedia: Long,
     looping: Boolean,
     currentSong: ItemsFirebase,
     listOfMedia: List<ItemsFirebase>,
@@ -63,14 +63,12 @@ fun WatchMediaScreen(
     routeOfPlayingSong: String
 ) {
     val context = LocalContext.current
-    val currentPosition = mainViewModel.currentPositionIndex.collectAsState()
     val favouriteState = favouriteViewModel.favouriteState.collectAsState()
     var isFavourite by remember {
         mutableStateOf(false)
     }
     LaunchedEffect(key1 = currentSong) {
-        isFavourite =
-            favouriteState.value.data?.toString()?.contains(currentSong.name.toString()) == true
+        isFavourite = favouriteState.value.data?.toString()?.contains(currentSong.name) == true
     }
 
     Column(
@@ -93,7 +91,7 @@ fun WatchMediaScreen(
             Slider(
                 value = currentTimeMedia.toFloat(),
                 onValueChange = {
-                    mainViewModel.setCurrentTime(it.toInt())
+                    mainViewModel.setCurrentTime(it.toLong())
                 },
                 valueRange = 0f..duration.toFloat(),
                 modifier = Modifier.fillMaxWidth(1f)
@@ -127,7 +125,7 @@ fun WatchMediaScreen(
                 )
             }
             IconButton(onClick = {
-                mainViewModel.playPreviousMedia(listOfMedia, routeOfPlayingSong)
+                mainViewModel.playPreviousMedia(listOfMedia, routeOfPlayingSong, context)
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_skip_previous_24),
@@ -153,7 +151,7 @@ fun WatchMediaScreen(
                 }
             }
             IconButton(onClick = {
-                mainViewModel.playNextMedia(listOfMedia, routeOfPlayingSong)
+                mainViewModel.playNextMedia(listOfMedia, routeOfPlayingSong, context)
             })
             {
                 Icon(
@@ -292,7 +290,7 @@ fun CardItem(
     }
 }
 
-fun Int.formatTime(): String {
+fun Long.formatTime(): String {
     val durationOfMedia = this / 1000
     val minutes = durationOfMedia / 60
     val seconds = durationOfMedia % 60
