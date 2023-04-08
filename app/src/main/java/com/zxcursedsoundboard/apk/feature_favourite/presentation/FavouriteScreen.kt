@@ -130,7 +130,6 @@ fun FavouriteItem(
 
     var expandedIndex by remember { mutableStateOf(-1) }
 
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 108.dp),
@@ -153,10 +152,10 @@ fun FavouriteItem(
                                 Screens.FavouriteScreen.route,
                                 items.map { entity ->
                                     ItemsFirebase(
-                                        entity.songAudioRes,
-                                        entity.songName,
-                                        entity.songAuthor,
-                                        entity.songImageRes
+                                        author = entity.songAuthor,
+                                        name = entity.songName,
+                                        image = entity.songImageRes,
+                                        audio = entity.songAudioRes
                                     )
                                 },
                             )
@@ -186,7 +185,7 @@ fun FavouriteItem(
                         }
                     }
                     Spacer(modifier = Modifier.width(16.dp))
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = mediaItem.songName,
                             maxLines = 1,
@@ -194,16 +193,9 @@ fun FavouriteItem(
                         )
                         Text(mediaItem.songAuthor, Modifier.alpha(0.5f))
                     }
-                    Spacer(modifier = Modifier.weight(1f))
 
                     IconButton(onClick = {
-                        val song = FavouriteEntity(
-                            id = mediaItem.id,
-                            songName = mediaItem.songName,
-                            songAuthor = mediaItem.songAuthor,
-                            songImageRes = mediaItem.songImageRes,
-                            songAudioRes = mediaItem.songAudioRes
-                        )
+
                         favouriteViewModel.deleteSong(mediaItem.songName)
                     }) {
                         Icon(

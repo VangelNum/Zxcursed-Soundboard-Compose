@@ -29,8 +29,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val fileRepository: FileRepository
+    private val fileRepository: FileRepository,
 ) : ViewModel() {
+
     private var mediaPlayer: MediaPlayer? = null
 
     private val _currentPositionIndex = MutableStateFlow(-1)
@@ -60,22 +61,42 @@ class MainViewModel @Inject constructor(
     private val _songList = MutableStateFlow<List<ItemsFirebase>>(emptyList())
     val songList = _songList.asStateFlow()
 
-    private val _song =
+    private val _songMain =
         MutableStateFlow<ResourceFirebase<List<ItemsFirebase>>>(ResourceFirebase.Empty())
-    val song = _song.asStateFlow()
+    val songMain = _songMain.asStateFlow()
 
-    fun getAudio() {
+    private val _soundsZxcursed =
+        MutableStateFlow<ResourceFirebase<List<ItemsFirebase>>>(ResourceFirebase.Empty())
+    val soundsZxcursed = _soundsZxcursed.asStateFlow()
+
+    fun getSoundsZxcursed() {
         viewModelScope.launch {
-            _song.value = ResourceFirebase.Loading()
+            _soundsZxcursed.value = ResourceFirebase.Loading()
+            try {
+                val db = Firebase.firestore
+                val query = db.collection("audioSound").get().await()
+                val items = query.documents.mapNotNull {
+                    it.toObject(ItemsFirebase::class.java)
+                }
+                _soundsZxcursed.value = ResourceFirebase.Success(items)
+            } catch (e: Exception) {
+                _soundsZxcursed.value = ResourceFirebase.Error(e.message.toString())
+            }
+        }
+    }
+
+    fun getAudioMain() {
+        viewModelScope.launch {
+            _songMain.value = ResourceFirebase.Loading()
             try {
                 val db = Firebase.firestore
                 val query = db.collection("audio").get().await()
                 val items = query.documents.mapNotNull {
                     it.toObject(ItemsFirebase::class.java)
                 }
-                _song.value = ResourceFirebase.Success(items)
+                _songMain.value = ResourceFirebase.Success(items)
             } catch (e: Exception) {
-                _song.value = ResourceFirebase.Error(e.message.toString())
+                _songMain.value = ResourceFirebase.Error(e.message.toString())
             }
         }
     }
@@ -90,10 +111,9 @@ class MainViewModel @Inject constructor(
         songList: List<ItemsFirebase>
     ) {
         _songList.value = songList
-        _routeOfPlayingSong.value = routeOfPlayingSong
         val song = ItemsFirebase(songAuthor, songName, songImage, songRes)
         _currentSong.value = song
-        if (index == _currentPositionIndex.value && mediaPlayer != null) {
+        if (index == _currentPositionIndex.value && mediaPlayer != null && _routeOfPlayingSong.value == routeOfPlayingSong) {
             togglePlayback()
         } else {
             mediaPlayer?.let {
@@ -133,15 +153,16 @@ class MainViewModel @Inject constructor(
                 }
             }
         }
+        _routeOfPlayingSong.value = routeOfPlayingSong
         updateCurrentTimePosition()
     }
 
     private fun togglePlayback() {
         if (mediaPlayer!!.isPlaying) {
-            mediaPlayer?.pause()
+            mediaPlayer!!.pause()
             _isPlaying.value = false
         } else {
-            mediaPlayer?.start()
+            mediaPlayer!!.start()
             _isPlaying.value = true
         }
     }

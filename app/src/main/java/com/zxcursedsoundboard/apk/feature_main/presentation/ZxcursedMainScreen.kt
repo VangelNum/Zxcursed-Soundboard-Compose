@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -67,7 +66,7 @@ fun ZxcursedMainScreen(
     val favouriteState = favouriteViewModel.favouriteState.collectAsStateWithLifecycle()
     val currentPosition = mainViewModel.currentPositionIndex.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val mediaItemsMain = mainViewModel.song.collectAsStateWithLifecycle()
+    val mediaItemsMain = mainViewModel.songMain.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = Unit) {
         mainViewModel.downloadStatus.collect { downloadStatus ->
@@ -97,8 +96,49 @@ fun ZxcursedMainScreen(
 
     when (mediaItemsMain.value) {
         is ResourceFirebase.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    items(5) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Card(
+                                modifier = Modifier.size(64.dp),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .placeholder(
+                                            visible = true,
+                                            color = Color.Gray,
+                                            highlight = PlaceholderHighlight.shimmer(
+                                                highlightColor = Color.White,
+                                            ),
+                                        )
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = "content", modifier = Modifier
+                                    .fillMaxWidth()
+                                    .placeholder(
+                                        visible = true,
+                                        color = Color.Gray,
+                                        highlight = PlaceholderHighlight.shimmer(
+                                            highlightColor = Color.White,
+                                        ),
+                                    )
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -110,7 +150,7 @@ fun ZxcursedMainScreen(
 
         is ResourceFirebase.Empty -> {
             LaunchedEffect(key1 = Unit) {
-                mainViewModel.getAudio()
+                mainViewModel.getAudioMain()
             }
         }
 
@@ -126,7 +166,7 @@ fun ZxcursedMainScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                itemsIndexed(mediaItemsMain.value.data!!) { index, item ->
+                itemsIndexed(mediaItemsMain.value.data?: emptyList()) { index, item ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -186,7 +226,7 @@ fun ZxcursedMainScreen(
                             }
                         }
                         Spacer(modifier = Modifier.width(16.dp))
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = item.name,
                                 maxLines = 1,
@@ -194,8 +234,6 @@ fun ZxcursedMainScreen(
                             )
                             Text(text = item.author, Modifier.alpha(0.5f))
                         }
-                        Spacer(modifier = Modifier.weight(1f))
-
                         val isFavourite = favouriteState.value.data?.toString()?.contains(item.name)
                         IconButton(onClick = {
                             val song = FavouriteEntity(
