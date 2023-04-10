@@ -45,9 +45,11 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.zxcursedsoundboard.apk.R
+import com.zxcursedsoundboard.apk.feature_alwayswannafly.presentation.AlwaysWannaFlyScreen
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteScreen
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
 import com.zxcursedsoundboard.apk.feature_main.presentation.ZxcursedMainScreen
+import com.zxcursedsoundboard.apk.feature_snail.presentation.SnailScreen
 import com.zxcursedsoundboard.apk.feature_sounds_zxcursed.presentation.ZxcursedSoundScreen
 import com.zxcursedsoundboard.apk.feature_watch_media.presentation.WatchMediaScreen
 
@@ -62,7 +64,6 @@ fun Navigation(
     val navController: NavHostController = rememberAnimatedNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination?.route
-
     val isPlaying = mainViewModel.isPlaying.collectAsStateWithLifecycle()
     val routeOfPlayingSong = mainViewModel.routeOfPlayingSong.collectAsStateWithLifecycle()
     val currentSong = mainViewModel.currentSong.collectAsStateWithLifecycle()
@@ -205,6 +206,24 @@ fun Navigation(
                     routeOfPlayingSong = routeOfPlayingSong.value
                 )
             }
+            composable(Screens.SnailScreen.route) {
+                SnailScreen(
+                    mainViewModel = mainViewModel,
+                    isPlaying = isPlaying.value,
+                    favouriteViewModel = favouriteViewModel,
+                    currentDestination = currentDestination,
+                    routeOfPlayingSong = routeOfPlayingSong.value
+                )
+            }
+            composable(Screens.AlwaysWannaFly.route) {
+                AlwaysWannaFlyScreen(
+                    mainViewModel = mainViewModel,
+                    isPlaying = isPlaying.value,
+                    favouriteViewModel = favouriteViewModel,
+                    currentDestination = currentDestination,
+                    routeOfPlayingSong = routeOfPlayingSong.value
+                )
+            }
         }
         AnimatedVisibility(
             currentSong.value.author != "" && currentDestination != Screens.WatchMediaScreen.route,
@@ -237,9 +256,17 @@ fun Navigation(
                                 modifier = Modifier.size(60.dp)
                             )
                         }
-                        Column (modifier = Modifier.weight(1f)){
-                            Text(text = currentSong.value.name, overflow = TextOverflow.Ellipsis, maxLines = 1)
-                            Text(text = currentSong.value.author,overflow = TextOverflow.Ellipsis, maxLines = 1)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = currentSong.value.name,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1
+                            )
+                            Text(
+                                text = currentSong.value.author,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1
+                            )
                         }
                         if (isPlaying.value) {
                             IconButton(onClick = { mainViewModel.pause() }) {

@@ -43,5 +43,4 @@ class FavouriteViewModel @Inject constructor(
             repository.deleteSong(songName)
         }
     }
-
 }

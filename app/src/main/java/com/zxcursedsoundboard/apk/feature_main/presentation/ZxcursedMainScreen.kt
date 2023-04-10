@@ -1,6 +1,5 @@
 package com.zxcursedsoundboard.apk.feature_main.presentation
 
-import android.widget.Toast
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
@@ -50,7 +49,6 @@ import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
-import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
@@ -67,32 +65,6 @@ fun ZxcursedMainScreen(
     val currentPosition = mainViewModel.currentPositionIndex.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val mediaItemsMain = mainViewModel.songMain.collectAsStateWithLifecycle()
-
-    LaunchedEffect(key1 = Unit) {
-        mainViewModel.downloadStatus.collect { downloadStatus ->
-            when (downloadStatus) {
-                is DownloadStatus.Success -> {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.download_complete_notification_title),
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-
-                is DownloadStatus.Error -> {
-                    Toast.makeText(
-                        context,
-                        downloadStatus.message,
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-
-                else -> {
-                    Unit
-                }
-            }
-        }
-    }
 
     when (mediaItemsMain.value) {
         is ResourceFirebase.Loading -> {
@@ -166,7 +138,7 @@ fun ZxcursedMainScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                itemsIndexed(mediaItemsMain.value.data?: emptyList()) { index, item ->
+                itemsIndexed(mediaItemsMain.value.data ?: emptyList()) { index, item ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -283,11 +255,11 @@ fun ZxcursedMainScreen(
                                     DropdownMenuItem(
                                         text = { Text(text = stringResource(id = R.string.download)) },
                                         onClick = {
-//                                    mainViewModel.downloadRawFile(
-//                                        context,
-//                                        item.audioResId,
-//                                        context.getString(item.songNameRes)
-//                                    )
+                                            mainViewModel.downloadFile(
+                                                url = item.audio,
+                                                fileName = item.name,
+                                                context = context
+                                            )
                                         },
                                         leadingIcon = {
                                             Icon(
@@ -299,11 +271,11 @@ fun ZxcursedMainScreen(
                                     DropdownMenuItem(
                                         text = { Text(text = stringResource(id = R.string.share)) },
                                         onClick = {
-//                                    mainViewModel.share(
-//                                        context = context,
-//                                        resourceId = item.audioResId,
-//                                        fileName = context.getString(item.songNameRes)
-//                                    )
+                                            mainViewModel.share(
+                                                context = context,
+                                                item.audio,
+                                                item.name
+                                            )
                                         },
                                         leadingIcon = {
                                             Icon(

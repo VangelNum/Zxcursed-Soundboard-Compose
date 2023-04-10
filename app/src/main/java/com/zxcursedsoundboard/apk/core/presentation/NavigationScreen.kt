@@ -27,7 +27,9 @@ fun NavigationScreen(navController: NavHostController) {
     val items = listOf(
         Screens.ZxcursedMainScreen,
         Screens.ZxcursedSoundScreen,
+        Screens.SnailScreen,
         Screens.FavouriteScreen,
+        Screens.AlwaysWannaFly
     )
 
     LazyColumn(

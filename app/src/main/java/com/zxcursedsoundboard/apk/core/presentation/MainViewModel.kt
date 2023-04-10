@@ -1,8 +1,12 @@
 package com.zxcursedsoundboard.apk.core.presentation
 
+import android.app.DownloadManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.core.content.FileProvider
+import android.content.IntentFilter
+import android.os.Environment
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.exoplayer2.ExoPlayer
@@ -11,12 +15,8 @@ import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.zxcursedsoundboard.apk.BuildConfig
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
-import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
-import com.zxcursedsoundboard.apk.core.domain.repository.FileRepository
-import com.zxcursedsoundboard.apk.feature_test.ItemsFirebase
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,14 +27,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.io.File
-import javax.inject.Inject
 
 
-@HiltViewModel
-class MainViewModel @Inject constructor(
-    private val fileRepository: FileRepository,
-) : ViewModel() {
+class MainViewModel : ViewModel() {
 
     private val _currentPositionIndex = MutableStateFlow(-1)
     val currentPositionIndex: StateFlow<Int> = _currentPositionIndex.asStateFlow()
@@ -42,8 +37,8 @@ class MainViewModel @Inject constructor(
     private val _routeOfPlayingSong = MutableStateFlow("")
     val routeOfPlayingSong = _routeOfPlayingSong.asStateFlow()
 
-    private val _currentSong = MutableStateFlow(ItemsFirebase("", "", "", ""))
-    val currentSong: StateFlow<ItemsFirebase> = _currentSong.asStateFlow()
+    private val _currentSong = MutableStateFlow(MediaItems("", "", "", ""))
+    val currentSong: StateFlow<MediaItems> = _currentSong.asStateFlow()
 
     private val _duration = MutableStateFlow(0L)
     val duration = _duration.asStateFlow()
@@ -54,22 +49,25 @@ class MainViewModel @Inject constructor(
     private val _looping = MutableStateFlow(false)
     val looping = _looping.asStateFlow()
 
-    private val _downloadStatus = MutableSharedFlow<DownloadStatus>()
-    val downloadStatus: SharedFlow<DownloadStatus> = _downloadStatus.asSharedFlow()
-
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
-    private val _songList = MutableStateFlow<List<ItemsFirebase>>(emptyList())
+    private val _songList = MutableStateFlow<List<MediaItems>>(emptyList())
     val songList = _songList.asStateFlow()
 
     private val _songMain =
-        MutableStateFlow<ResourceFirebase<List<ItemsFirebase>>>(ResourceFirebase.Empty())
+        MutableStateFlow<ResourceFirebase<List<MediaItems>>>(ResourceFirebase.Empty())
     val songMain = _songMain.asStateFlow()
 
     private val _soundsZxcursed =
-        MutableStateFlow<ResourceFirebase<List<ItemsFirebase>>>(ResourceFirebase.Empty())
+        MutableStateFlow<ResourceFirebase<List<MediaItems>>>(ResourceFirebase.Empty())
     val soundsZxcursed = _soundsZxcursed.asStateFlow()
+
+    private val _soundsSnail = MutableStateFlow<ResourceFirebase<List<MediaItems>>>(ResourceFirebase.Empty())
+    val soundsSnail = _soundsSnail.asStateFlow()
+
+    private val _soundsFly = MutableStateFlow<ResourceFirebase<List<MediaItems>>>(ResourceFirebase.Empty())
+    val soundsFly = _soundsFly.asStateFlow()
 
     fun getSoundsZxcursed() {
         viewModelScope.launch {
@@ -78,11 +76,43 @@ class MainViewModel @Inject constructor(
                 val db = Firebase.firestore
                 val query = db.collection("audioSound").get().await()
                 val items = query.documents.mapNotNull {
-                    it.toObject(ItemsFirebase::class.java)
+                    it.toObject(MediaItems::class.java)
                 }
                 _soundsZxcursed.value = ResourceFirebase.Success(items)
             } catch (e: Exception) {
                 _soundsZxcursed.value = ResourceFirebase.Error(e.message.toString())
+            }
+        }
+    }
+
+    fun getFlySounds() {
+        viewModelScope.launch {
+            _soundsFly.value = ResourceFirebase.Loading()
+            try {
+                val db = Firebase.firestore
+                val query = db.collection("audioFly").get().await()
+                val items = query.documents.mapNotNull {
+                    it.toObject(MediaItems::class.java)
+                }
+                _soundsFly.value = ResourceFirebase.Success(items)
+            } catch (e: Exception) {
+                _soundsFly.value = ResourceFirebase.Error(e.message.toString())
+            }
+        }
+    }
+
+    fun getSnailSounds() {
+        viewModelScope.launch {
+            _soundsSnail.value = ResourceFirebase.Loading()
+            try {
+                val db = Firebase.firestore
+                val query = db.collection("audioUlitka").get().await()
+                val items = query.documents.mapNotNull {
+                    it.toObject(MediaItems::class.java)
+                }
+                _soundsSnail.value = ResourceFirebase.Success(items)
+            } catch (e: Exception) {
+                _soundsSnail.value = ResourceFirebase.Error(e.message.toString())
             }
         }
     }
@@ -94,7 +124,7 @@ class MainViewModel @Inject constructor(
                 val db = Firebase.firestore
                 val query = db.collection("audio").get().await()
                 val items = query.documents.mapNotNull {
-                    it.toObject(ItemsFirebase::class.java)
+                    it.toObject(MediaItems::class.java)
                 }
                 _songMain.value = ResourceFirebase.Success(items)
             } catch (e: Exception) {
@@ -112,12 +142,12 @@ class MainViewModel @Inject constructor(
         songAuthor: String,
         songImage: String,
         routeOfPlayingSong: String,
-        songList: List<ItemsFirebase>,
+        songList: List<MediaItems>,
         context: Context
     ) {
         _songList.value = songList
         val mediaItem = MediaItem.fromUri(songRes)
-        _currentSong.value = ItemsFirebase(songAuthor, songName, songImage, songRes)
+        _currentSong.value = MediaItems(songAuthor, songName, songImage, songRes)
         if (index == _currentPositionIndex.value && player != null && _routeOfPlayingSong.value == routeOfPlayingSong) {
             togglePlayback()
         } else {
@@ -142,8 +172,8 @@ class MainViewModel @Inject constructor(
                                 player?.play()
                             } else {
                                 val nextIndex = index + 1
-                                if (nextIndex < songList.size) {
-                                    val nextMediaItem = songList[nextIndex]
+                                if (nextIndex < _songList.value.size) {
+                                    val nextMediaItem = _songList.value[nextIndex]
                                     setMedia(
                                         nextIndex,
                                         nextMediaItem.audio,
@@ -151,7 +181,7 @@ class MainViewModel @Inject constructor(
                                         nextMediaItem.author,
                                         nextMediaItem.image,
                                         routeOfPlayingSong,
-                                        songList,
+                                        _songList.value,
                                         context
                                     )
                                 } else {
@@ -196,7 +226,7 @@ class MainViewModel @Inject constructor(
         _looping.value = !_looping.value
     }
 
-    fun playNextMedia(songList: List<ItemsFirebase>, currentRoute: String, context: Context) {
+    fun playNextMedia(songList: List<MediaItems>, currentRoute: String, context: Context) {
         val nextIndex = (_currentPositionIndex.value + 1) % songList.size
         setMedia(
             nextIndex,
@@ -211,7 +241,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun playPreviousMedia(
-        songList: List<ItemsFirebase>,
+        songList: List<MediaItems>,
         currentRoute: String,
         context: Context
     ) {
@@ -231,7 +261,7 @@ class MainViewModel @Inject constructor(
         )
     }
 
-    fun setCurrentTime(position: Long) {
+    fun setTimeOfMedia(position: Long) {
         player?.seekTo(position)
         player?.play()
     }
@@ -249,39 +279,36 @@ class MainViewModel @Inject constructor(
         player?.release()
     }
 
-    fun share(context: Context, resourceId: Int, fileName: String) {
-        val mediaFile = context.resources.openRawResourceFd(resourceId)
-        val mediaUri = FileProvider.getUriForFile(
-            context,
-            "${BuildConfig.APPLICATION_ID}.fileprovider",
-            File(context.cacheDir, " $fileName.mp3")
-        )
-        val outputStream = context.contentResolver.openOutputStream(mediaUri)
-        mediaFile.createInputStream().use { input ->
-            outputStream.use { output ->
-                if (output != null) {
-                    input.copyTo(output)
+    fun downloadFile(url: String, fileName: String, context: Context) {
+        val downloadManager = context.getSystemService(DownloadManager::class.java)
+        val request = DownloadManager.Request(url.toUri())
+            .setMimeType("audio/mp3")
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setTitle("$fileName.mp3")
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "$fileName.mp3")
+        downloadManager.enqueue(request)
+    }
+
+    fun share(context: Context, audioUrl: String, fileName: String) {
+        val downloadManager = context.getSystemService(DownloadManager::class.java)
+        val request = DownloadManager.Request(audioUrl.toUri())
+            .setMimeType("audio/mp3")
+            .setTitle("$fileName.mp3")
+            .setDescription("Downloading $fileName")
+
+        val downloadId = downloadManager.enqueue(request)
+
+        val onCompleteReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val fileUri = downloadManager.getUriForDownloadedFile(downloadId)
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "audio/mp3"
+                    putExtra(Intent.EXTRA_STREAM, fileUri)
                 }
+                context?.startActivity(Intent.createChooser(shareIntent, "Share MP3"))
             }
         }
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "audio/mp3"
-            putExtra(Intent.EXTRA_STREAM, mediaUri)
-        }
-        val chooser = Intent.createChooser(intent, "Share media file")
-        context.startActivity(chooser)
+        val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        context.registerReceiver(onCompleteReceiver, filter)
     }
-
-    fun downloadRawFile(context: Context, rawResId: Int, fileName: String) {
-        viewModelScope.launch(Dispatchers.Main) {
-            _downloadStatus.emit(DownloadStatus.Loading)
-            val isSuccess = fileRepository.downloadRawFile(context, rawResId, fileName)
-            if (isSuccess) {
-                _downloadStatus.emit(DownloadStatus.Success)
-            } else {
-                _downloadStatus.emit(DownloadStatus.Error("Error, file already exists or permission is required"))
-            }
-        }
-    }
-
 }

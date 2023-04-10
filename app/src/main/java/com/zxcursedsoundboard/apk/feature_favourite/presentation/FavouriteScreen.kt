@@ -1,6 +1,5 @@
 package com.zxcursedsoundboard.apk.feature_favourite.presentation
 
-import android.widget.Toast
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -28,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,11 +45,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.Resource
-import com.zxcursedsoundboard.apk.core.data.model.DownloadStatus
+import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.core.presentation.Screens
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
-import com.zxcursedsoundboard.apk.feature_test.ItemsFirebase
 
 @Composable
 fun FavouriteScreen(
@@ -102,31 +99,7 @@ fun FavouriteItem(
 ) {
     val currentPosition = mainViewModel.currentPositionIndex.collectAsState()
     val context = LocalContext.current
-    LaunchedEffect(key1 = Unit) {
-        mainViewModel.downloadStatus.collect { downloadStatus ->
-            when (downloadStatus) {
-                is DownloadStatus.Success -> {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.download_complete_notification_title),
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
 
-                is DownloadStatus.Error -> {
-                    Toast.makeText(
-                        context,
-                        downloadStatus.message,
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-
-                else -> {
-                    Unit
-                }
-            }
-        }
-    }
 
     var expandedIndex by remember { mutableStateOf(-1) }
 
@@ -151,7 +124,7 @@ fun FavouriteItem(
                                 mediaItem.songImageRes,
                                 Screens.FavouriteScreen.route,
                                 items.map { entity ->
-                                    ItemsFirebase(
+                                    MediaItems(
                                         author = entity.songAuthor,
                                         name = entity.songName,
                                         image = entity.songImageRes,
@@ -196,7 +169,6 @@ fun FavouriteItem(
                     }
 
                     IconButton(onClick = {
-
                         favouriteViewModel.deleteSong(mediaItem.songName)
                     }) {
                         Icon(
@@ -223,11 +195,11 @@ fun FavouriteItem(
                                 DropdownMenuItem(
                                     text = { Text(text = stringResource(id = R.string.download)) },
                                     onClick = {
-//                                        mainViewModel.downloadRawFile(
-//                                            context,
-//                                            mediaItem.songAudioRes,
-//                                            context.getString(mediaItem.songName)
-//                                        )
+                                        mainViewModel.downloadFile(
+                                            url = mediaItem.songAudioRes,
+                                            fileName = mediaItem.songName,
+                                            context = context
+                                        )
                                     },
                                     leadingIcon = {
                                         Icon(
@@ -239,11 +211,11 @@ fun FavouriteItem(
                                 DropdownMenuItem(
                                     text = { Text(text = stringResource(id = R.string.share)) },
                                     onClick = {
-//                                        mainViewModel.share(
-//                                            context = context,
-//                                            resourceId = mediaItem.songAudioRes,
-//                                            fileName = context.getString(mediaItem.songName)
-//                                        )
+                                        mainViewModel.share(
+                                            context = context,
+                                            mediaItem.songAudioRes,
+                                            mediaItem.songName
+                                        )
                                     },
                                     leadingIcon = {
                                         Icon(

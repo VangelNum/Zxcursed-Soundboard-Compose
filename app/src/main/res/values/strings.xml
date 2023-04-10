@@ -46,7 +46,9 @@
     <string name="unrealbuyback">Нереальный байбек</string>
     <string name="buybackfly">байбек флая</string>
     <string name="apmfly">апм флая</string>
+
     <string name="kvakvakva">ква ква ква</string>
+
     <string name="onpausit">он паузит</string>
     <string name="makfluri">макфлури привезли</string>
     <string name="stavka">ставка</string>
@@ -100,6 +102,8 @@
     <string name="download_complete_notification_title">Download complete in download folder</string>
     <string name="download_complete_notification_message">File downloaded</string>
     <string name="grand_permission">Please grant permission to download the file</string>
+    <string name="snail">Улиточка</string>
+    <string name="fly">AlwaysWannaFly</string>
 
 
 </resources>

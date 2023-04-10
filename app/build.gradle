@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId "com.zxcursedsoundboard.apk"
-        minSdk 21
+        minSdk 23
         targetSdk 33
         versionCode 17
         versionName "2.1"

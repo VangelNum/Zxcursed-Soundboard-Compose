@@ -44,10 +44,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.zxcursedsoundboard.apk.R
+import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
-import com.zxcursedsoundboard.apk.feature_test.ItemsFirebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,8 +57,8 @@ fun WatchMediaScreen(
     duration: Long,
     currentTimeMedia: Long,
     looping: Boolean,
-    currentSong: ItemsFirebase,
-    listOfMedia: List<ItemsFirebase>,
+    currentSong: MediaItems,
+    listOfMedia: List<MediaItems>,
     favouriteViewModel: FavouriteViewModel,
     routeOfPlayingSong: String
 ) {
@@ -78,11 +78,11 @@ fun WatchMediaScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         CardItem(
-            currentSong.image,
-            mainViewModel,
-            context,
-            currentSong.author,
-            currentSong.name
+            image = currentSong.image,
+            mainViewModel = mainViewModel,
+            context = context,
+            audioRes = currentSong.audio,
+            songNameRes = currentSong.name
         )
         Spacer(modifier = Modifier.height(4.dp))
         AuthorAndTitleItem(currentSong.name, currentSong.author)
@@ -91,7 +91,7 @@ fun WatchMediaScreen(
             Slider(
                 value = currentTimeMedia.toFloat(),
                 onValueChange = {
-                    mainViewModel.setCurrentTime(it.toLong())
+                    mainViewModel.setTimeOfMedia(it.toLong())
                 },
                 valueRange = 0f..duration.toFloat(),
                 modifier = Modifier.fillMaxWidth(1f)
@@ -162,7 +162,7 @@ fun WatchMediaScreen(
             }
             if (isFavourite) {
                 IconButton(onClick = {
-//                    favouriteViewModel.deleteSong(currentSong.name)
+                    favouriteViewModel.deleteSong(currentSong.name)
                     isFavourite = false
                 }) {
                     Icon(
@@ -255,11 +255,11 @@ fun CardItem(
                     DropdownMenuItem(
                         text = { Text(text = stringResource(id = R.string.download)) },
                         onClick = {
-//                            mainViewModel.downloadRawFile(
-//                                context,
-//                                audioRes,
-//                                context.getString(songNameRes)
-//                            )
+                            mainViewModel.downloadFile(
+                                url = audioRes,
+                                fileName = songNameRes,
+                                context = context,
+                            )
                         },
                         leadingIcon = {
                             Icon(
@@ -271,11 +271,11 @@ fun CardItem(
                     DropdownMenuItem(
                         text = { Text(text = stringResource(id = R.string.share)) },
                         onClick = {
-//                            mainViewModel.share(
-//                                context = context,
-//                                resourceId = audioRes,
-//                                fileName = context.getString(songNameRes)
-//                            )
+                            mainViewModel.share(
+                                context = context,
+                                audioUrl = audioRes,
+                                fileName = songNameRes
+                            )
                         },
                         leadingIcon = {
                             Icon(
