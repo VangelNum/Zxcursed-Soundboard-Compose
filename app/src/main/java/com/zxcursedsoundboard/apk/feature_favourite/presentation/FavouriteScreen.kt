@@ -47,7 +47,7 @@ import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.Resource
 import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
-import com.zxcursedsoundboard.apk.core.presentation.Screens
+import com.zxcursedsoundboard.apk.core.presentation.navigation.Screens
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 
 @Composable
@@ -105,7 +105,7 @@ fun FavouriteItem(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 108.dp),
+        contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         itemsIndexed(

@@ -32,8 +32,6 @@ val Typography = Typography(
         fontFamily = UbuntyFonts,
         fontWeight = FontWeight.Bold,
         fontSize = 30.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.sp
     ),
     titleMedium = TextStyle(
         fontFamily = UbuntyFonts,

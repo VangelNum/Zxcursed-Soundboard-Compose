@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.zxcursedsoundboard.apk.core.presentation.Navigation
+import com.zxcursedsoundboard.apk.core.presentation.navigation.Navigation
 import com.zxcursedsoundboard.apk.ui.theme.ZxcursedSoundboardComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 

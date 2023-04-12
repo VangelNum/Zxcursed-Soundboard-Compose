@@ -93,8 +93,8 @@
     <string name="zavaliebalo">Завали ебало</string>
     <string name="razban">Скоро разбанят</string>
 
-    <string name="cursed">КУРСЕД</string>
-    <string name="sounds_cursed">ПЕСНИ КУРСЕДА</string>
+    <string name="cursed">ФРАЗЫ КУРСЕДА</string>
+    <string name="sounds_cursed">ПЕСНИ И КАВЕРЫ КУРСЕДА</string>
     <string name="favourite">ИЗБРАННОЕ</string>
     <string name="navigation">НАВИГАЦИЯ</string>
     <string name="watch_audio">Посмотреть аудио</string>
@@ -102,8 +102,25 @@
     <string name="download_complete_notification_title">Download complete in download folder</string>
     <string name="download_complete_notification_message">File downloaded</string>
     <string name="grand_permission">Please grant permission to download the file</string>
-    <string name="snail">Улиточка</string>
-    <string name="fly">AlwaysWannaFly</string>
+    <string name="snail">УЛИТОЧКА</string>
+    <string name="fly">ALWAYSWANNAFLY</string>
+    <string name="contacts">Контакты</string>
+
+
+    <string name="errorContract">"При возникновении ошибки, по предложениям доработки приложения, если хотите добавить фразу"</string>
+    <string name="vk_com_vangelnum">"<u>VK.COM/VANGELNUM</u>"</string>
+    <string name="gmail_vangelnum">"<u>VANGELNUM@GMAIL.COM</u>"</string>
+    <string name="best_dota_rep">"Ссылки на лучшего дота репера"</string>
+    <string name="youtube_zxcursed">"<u>YOUTUBE.COM/ZXCURSED</u>"</string>
+    <string name="telegram_zxcursed">"<u>T.ME/ZXCURSED</u>"</string>
+    <string name="vk_zxcursed">"<u>VK.COM/ZXCURSED</u>"</string>
+
+    <string name="confirm_action">Подтверждение действия</string>
+    <string name="are_you_sure_soundboard">Вы действительно хотите перейти на страницу Google Play и просмотреть приложение Zxcursed Soundboard?</string>
+    <string name="are_you_sure_drumpad">Вы действительно хотите перейти на страницу Google Play и просмотреть приложение Zxcursed DrumPad?</string>
+    <string name="no">Нет</string>
+    <string name="yes">Да</string>
+    <string name="another_applications">Другие приложения с курседом</string>
 
 
 </resources>

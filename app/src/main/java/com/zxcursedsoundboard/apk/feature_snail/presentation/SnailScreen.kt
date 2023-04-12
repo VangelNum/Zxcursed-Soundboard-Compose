@@ -131,10 +131,7 @@ fun SnailScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
-                    start = 16.dp,
-                    top = 16.dp,
-                    end = 16.dp,
-                    bottom = 108.dp
+                    16.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
