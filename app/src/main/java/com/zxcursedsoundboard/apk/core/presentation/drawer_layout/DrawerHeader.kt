@@ -90,10 +90,10 @@ fun DrawerBody(navController: NavController, drawerState: DrawerState) {
     )
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val openDialogSoundBoard = remember { mutableStateOf(false) }
+    val openDialogWallpaper = remember { mutableStateOf(false) }
     val openDialogDrumPad = remember { mutableStateOf(false) }
 
-    AlertDialogZxcursedSoundboard(openDialogSoundBoard, context)
+    AlertDialogZxcursedWallpaper(openDialogWallpaper, context)
     AlertDialogZxcursedDrumPad(openDialogDrumPad, context)
 
     LazyColumn {
@@ -120,9 +120,9 @@ fun DrawerBody(navController: NavController, drawerState: DrawerState) {
         itemsIndexed(itemsAnotherApplications) { index, item ->
             ListItem(modifier = Modifier.clickable {
                 if (index == 0) {
-                    openDialogSoundBoard.value = true
-                } else {
                     openDialogDrumPad.value = true
+                } else {
+                    openDialogWallpaper.value = true
                 }
             }, headlineContent = {
                 Text(text = item.title)
@@ -176,20 +176,20 @@ fun AlertDialogZxcursedDrumPad(openDialog: MutableState<Boolean>, context: Conte
 
 
 @Composable
-fun AlertDialogZxcursedSoundboard(openDialog: MutableState<Boolean>, context: Context) {
+fun AlertDialogZxcursedWallpaper(openDialog: MutableState<Boolean>, context: Context) {
     if (openDialog.value) {
         AlertDialog(
             onDismissRequest = {
                 openDialog.value = false
             },
             title = { Text(text = stringResource(id = R.string.confirm_action)) },
-            text = { Text(stringResource(id = R.string.are_you_sure_soundboard)) },
+            text = { Text(stringResource(id = R.string.are_you_sure_wallpaper)) },
             confirmButton = {
                 Button(
                     onClick = {
                         val intent = Intent(Intent.ACTION_VIEW)
                         intent.data =
-                            Uri.parse("https://play.google.com/store/apps/details?id=com.zxcursedsoundboard.apk")
+                            Uri.parse("https://play.google.com/store/apps/details?id=com.zxcursed.wallpaper")
                         context.startActivity(intent)
                         openDialog.value = false
                     }
@@ -221,10 +221,10 @@ fun onEvent(
         is DrawerItems.Share -> {
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TITLE, "Спасибо за то, что поделился приложением! ❤")
+                putExtra(Intent.EXTRA_TITLE, "Спасибо за то, что делишься приложением! ❤")
                 putExtra(
                     Intent.EXTRA_TEXT,
-                    "https://github.com/VangelNum/Unsplash_Photos"
+                    "https://play.google.com/store/apps/details?id=com.zxcursedsoundboard.apk"
                 )
                 type = "text/plain"
             }

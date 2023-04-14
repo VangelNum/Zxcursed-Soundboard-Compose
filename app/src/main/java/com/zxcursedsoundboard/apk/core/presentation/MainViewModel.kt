@@ -63,10 +63,12 @@ class MainViewModel : ViewModel() {
         MutableStateFlow<ResourceFirebase<List<MediaItems>>>(ResourceFirebase.Empty())
     val soundsZxcursed = _soundsZxcursed.asStateFlow()
 
-    private val _soundsSnail = MutableStateFlow<ResourceFirebase<List<MediaItems>>>(ResourceFirebase.Empty())
+    private val _soundsSnail =
+        MutableStateFlow<ResourceFirebase<List<MediaItems>>>(ResourceFirebase.Empty())
     val soundsSnail = _soundsSnail.asStateFlow()
 
-    private val _soundsFly = MutableStateFlow<ResourceFirebase<List<MediaItems>>>(ResourceFirebase.Empty())
+    private val _soundsFly =
+        MutableStateFlow<ResourceFirebase<List<MediaItems>>>(ResourceFirebase.Empty())
     val soundsFly = _soundsFly.asStateFlow()
 
     fun getSoundsZxcursed() {
@@ -171,22 +173,7 @@ class MainViewModel : ViewModel() {
                                 player?.seekTo(0)
                                 player?.play()
                             } else {
-                                val nextIndex = index + 1
-                                if (nextIndex < _songList.value.size) {
-                                    val nextMediaItem = _songList.value[nextIndex]
-                                    setMedia(
-                                        nextIndex,
-                                        nextMediaItem.audio,
-                                        nextMediaItem.name,
-                                        nextMediaItem.author,
-                                        nextMediaItem.image,
-                                        routeOfPlayingSong,
-                                        _songList.value,
-                                        context
-                                    )
-                                } else {
-                                    _isPlaying.value = false
-                                }
+                                playNextMedia(_songList.value, _routeOfPlayingSong.value, context)
                             }
                         }
                     }
@@ -240,6 +227,78 @@ class MainViewModel : ViewModel() {
         )
     }
 
+    fun playNextMediaFavourite(songList: List<MediaItems>, currentRoute: String, context: Context) {
+        val nextIndex = (_currentPositionIndex.value + 1) % _songList.value.size
+        setMediaFavourite(
+            nextIndex,
+            songList[nextIndex].audio,
+            songList[nextIndex].name,
+            songList[nextIndex].author,
+            songList[nextIndex].image,
+            currentRoute,
+            songList,
+            context
+        )
+    }
+
+    private fun setMediaFavourite(
+        index: Int,
+        songRes: String,
+        songName: String,
+        songAuthor: String,
+        songImage: String,
+        routeOfPlayingSong: String,
+        songList: List<MediaItems>,
+        context: Context
+    ) {
+        _songList.value = songList
+        val mediaItem = MediaItem.fromUri(songRes)
+        _currentSong.value = MediaItems(songAuthor, songName, songImage, songRes)
+        player?.let {
+            it.stop()
+            it.release()
+        }
+        player = ExoPlayer.Builder(context).build().apply {
+            setMediaItem(mediaItem)
+            prepare()
+            play()
+            addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(state: Int) {
+                    if (state == Player.STATE_READY || state == Player.STATE_BUFFERING) {
+                        _isPlaying.value = true
+                        _currentPositionIndex.value = index - 1
+                        _duration.value = player?.duration ?: 0
+                    }
+                    if (state == Player.STATE_ENDED) {
+                        if (_looping.value) {
+                            player?.seekTo(0)
+                            player?.play()
+                        } else {
+                            playNextMedia(_songList.value, _routeOfPlayingSong.value, context)
+                        }
+                    }
+                }
+
+                override fun onPlayerError(error: PlaybackException) {
+                    _isPlaying.value = false
+                }
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    viewModelScope.launch(Dispatchers.Main) {
+                        while (isPlaying) {
+                            val currentPosition = player?.currentPosition ?: 0
+                            _currentTimeMedia.emit(currentPosition)
+                            delay(16)
+                        }
+                    }
+                }
+            })
+
+        }
+        _routeOfPlayingSong.value = routeOfPlayingSong
+    }
+
+
     fun playPreviousMedia(
         songList: List<MediaItems>,
         currentRoute: String,
@@ -274,6 +333,16 @@ class MainViewModel : ViewModel() {
         togglePlayback()
     }
 
+    fun updateSongList(list: List<MediaItems>) {
+        _songList.value = list
+    }
+
+    fun updatePosition(index: Int, currentDestination: String?) {
+        if (_currentPositionIndex.value > index && currentDestination == _routeOfPlayingSong.value) {
+            _currentPositionIndex.value--
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         player?.release()
@@ -289,7 +358,13 @@ class MainViewModel : ViewModel() {
         downloadManager.enqueue(request)
     }
 
+    private var onCompleteReceiver: BroadcastReceiver? = null
+
     fun share(context: Context, audioUrl: String, fileName: String) {
+        onCompleteReceiver?.let {
+            context.unregisterReceiver(it)
+        }
+
         val downloadManager = context.getSystemService(DownloadManager::class.java)
         val request = DownloadManager.Request(audioUrl.toUri())
             .setMimeType("audio/mp3")
@@ -298,7 +373,7 @@ class MainViewModel : ViewModel() {
 
         val downloadId = downloadManager.enqueue(request)
 
-        val onCompleteReceiver = object : BroadcastReceiver() {
+        onCompleteReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val fileUri = downloadManager.getUriForDownloadedFile(downloadId)
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -306,9 +381,12 @@ class MainViewModel : ViewModel() {
                     putExtra(Intent.EXTRA_STREAM, fileUri)
                 }
                 context?.startActivity(Intent.createChooser(shareIntent, "Share MP3"))
+                context?.unregisterReceiver(this)
+                onCompleteReceiver = null
             }
         }
         val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
         context.registerReceiver(onCompleteReceiver, filter)
     }
+
 }

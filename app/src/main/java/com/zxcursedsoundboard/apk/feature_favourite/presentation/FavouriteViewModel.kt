@@ -17,9 +17,10 @@ import javax.inject.Inject
 @HiltViewModel
 class FavouriteViewModel @Inject constructor(
     private val repository: FavouriteRepository
-): ViewModel() {
+) : ViewModel() {
 
-    private val _favouriteState = MutableStateFlow<Resource<List<FavouriteEntity>>>(Resource.Loading())
+    private val _favouriteState =
+        MutableStateFlow<Resource<List<FavouriteEntity>>>(Resource.Loading())
     val favouriteState = _favouriteState.asStateFlow()
 
     init {
@@ -27,7 +28,7 @@ class FavouriteViewModel @Inject constructor(
     }
 
     private fun getAllFavouriteSongs() {
-        repository.getAllSongs().onEach { res->
+        repository.getAllSongs().onEach { res ->
             _favouriteState.value = res
         }.launchIn(viewModelScope)
     }

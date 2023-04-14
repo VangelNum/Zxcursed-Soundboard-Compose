@@ -32,9 +32,10 @@ import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.transformation.blur.BlurTransformationPlugin
+import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 
 @Composable
-fun NavigationScreen(navController: NavHostController) {
+fun NavigationScreen(navController: NavHostController, currentSong: MediaItems) {
     val items = listOf(
         Screens.ZxcursedMainScreen,
         Screens.ZxcursedSoundScreen,
@@ -45,7 +46,12 @@ fun NavigationScreen(navController: NavHostController) {
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = if (currentSong.author != "") PaddingValues(
+            top = 16.dp,
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 108.dp
+        ) else PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(items) { item ->
@@ -87,7 +93,10 @@ fun NavigationScreen(navController: NavHostController) {
                 ) {
                     Text(
                         text = stringResource(id = item.nameScreen),
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp, lineHeight = 35.sp,),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontSize = 24.sp,
+                            lineHeight = 35.sp,
+                        ),
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier

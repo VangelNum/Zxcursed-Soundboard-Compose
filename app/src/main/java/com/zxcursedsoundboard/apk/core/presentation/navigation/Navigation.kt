@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,12 +36,10 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -89,14 +88,6 @@ fun Navigation(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    var contentPadding by remember {
-        mutableStateOf(0.dp)
-    }
-    if (currentDestination == Screens.WatchMediaScreen.route) {
-        contentPadding = 0.dp
-    } else if (currentSong.value.author != "") {
-        contentPadding = 100.dp
-    }
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -115,26 +106,43 @@ fun Navigation(
         content = {
             Scaffold(
                 topBar = {
-                    TopAppBar(
-                        title = { },
-                        navigationIcon = {
+                    if (currentDestination == Screens.NavigationScreen.route) {
+                        TopAppBar(
+                            title = { },
+                            navigationIcon = {
+                                IconButton(onClick = {
+                                    scope.launch {
+                                        drawerState.open()
+                                    }
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Menu,
+                                        contentDescription = "menu"
+                                    )
+                                }
+                            })
+
+                    } else if (currentDestination!=null) {
+                        TopAppBar(title = {  }, navigationIcon = {
                             IconButton(onClick = {
                                 scope.launch {
-                                    drawerState.open()
+                                    navController.popBackStack()
                                 }
                             }) {
-                                Icon(imageVector = Icons.Outlined.Menu, contentDescription = "menu")
+                                Icon(
+                                    imageVector = Icons.Outlined.ArrowBack,
+                                    contentDescription = "menu"
+                                )
                             }
                         })
+                    }
                 },
 
-                ) {
+                ) { padding ->
                 AnimatedNavHost(
                     navController,
                     startDestination = startDestination,
-                    modifier = Modifier
-                        .padding(it)
-                        .padding(bottom = contentPadding)
+                    modifier = Modifier.padding(padding)
                 ) {
                     composable(
                         Screens.WatchMediaScreen.route,
@@ -165,7 +173,7 @@ fun Navigation(
                     }
                     composable(
                         Screens.NavigationScreen.route,
-                    ) { NavigationScreen(navController = navController) }
+                    ) { NavigationScreen(navController = navController, currentSong.value) }
                     composable(
                         Screens.ZxcursedMainScreen.route,
                         enterTransition = {
@@ -202,7 +210,8 @@ fun Navigation(
                             isPlaying = isPlaying.value,
                             favouriteViewModel = favouriteViewModel,
                             currentDestination = currentDestination,
-                            routeOfPlayingSong = routeOfPlayingSong.value
+                            routeOfPlayingSong = routeOfPlayingSong.value,
+                            currentSong = currentSong.value
                         )
 
                     }
@@ -211,8 +220,8 @@ fun Navigation(
                             favouriteViewModel,
                             mainViewModel,
                             isPlaying.value,
-                            currentDestination,
-                            routeOfPlayingSong.value
+                            routeOfPlayingSong.value,
+                            currentSong = currentSong.value
                         )
                     }
                     composable(
@@ -251,7 +260,8 @@ fun Navigation(
                             isPlaying = isPlaying.value,
                             favouriteViewModel = favouriteViewModel,
                             currentDestination = currentDestination,
-                            routeOfPlayingSong = routeOfPlayingSong.value
+                            routeOfPlayingSong = routeOfPlayingSong.value,
+                            currentSong = currentSong.value
                         )
                     }
                     composable(Screens.SnailScreen.route) {
@@ -260,7 +270,8 @@ fun Navigation(
                             isPlaying = isPlaying.value,
                             favouriteViewModel = favouriteViewModel,
                             currentDestination = currentDestination,
-                            routeOfPlayingSong = routeOfPlayingSong.value
+                            routeOfPlayingSong = routeOfPlayingSong.value,
+                            currentSong = currentSong.value
                         )
                     }
                     composable(Screens.AlwaysWannaFlyScreen.route) {
@@ -269,11 +280,12 @@ fun Navigation(
                             isPlaying = isPlaying.value,
                             favouriteViewModel = favouriteViewModel,
                             currentDestination = currentDestination,
-                            routeOfPlayingSong = routeOfPlayingSong.value
+                            routeOfPlayingSong = routeOfPlayingSong.value,
+                            currentSong = currentSong.value
                         )
                     }
                     composable(Screens.ContactScreen.route) {
-                        ContactScreen()
+                        ContactScreen(currentSong = currentSong.value)
                     }
                 }
                 AnimatedVisibility(
@@ -307,7 +319,8 @@ fun Navigation(
                                     SubcomposeAsyncImage(
                                         model = currentSong.value.image,
                                         contentDescription = null,
-                                        modifier = Modifier.size(64.dp)
+                                        modifier = Modifier.size(64.dp),
+                                        contentScale = ContentScale.Crop,
                                     )
                                 }
                                 Column(modifier = Modifier.weight(1f)) {

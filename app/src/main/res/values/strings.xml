@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Zxcursed Soundboard</string>
     <string name="check2">"<u>VK.COM/VANGELNUM</u>"</string>
     <string name="check3">"<u>VANGELNUM@GMAIL.COM</u>"</string>
@@ -47,7 +47,7 @@
     <string name="buybackfly">байбек флая</string>
     <string name="apmfly">апм флая</string>
 
-    <string name="kvakvakva">ква ква ква</string>
+    <string name="kvakvakva" tools:ignore="Typos">ква ква ква</string>
 
     <string name="onpausit">он паузит</string>
     <string name="makfluri">макфлури привезли</string>
@@ -116,7 +116,7 @@
     <string name="vk_zxcursed">"<u>VK.COM/ZXCURSED</u>"</string>
 
     <string name="confirm_action">Подтверждение действия</string>
-    <string name="are_you_sure_soundboard">Вы действительно хотите перейти на страницу Google Play и просмотреть приложение Zxcursed Soundboard?</string>
+    <string name="are_you_sure_wallpaper">Вы действительно хотите перейти на страницу Google Play и просмотреть приложение Zxcursed Wallpaper?</string>
     <string name="are_you_sure_drumpad">Вы действительно хотите перейти на страницу Google Play и просмотреть приложение Zxcursed DrumPad?</string>
     <string name="no">Нет</string>
     <string name="yes">Да</string>

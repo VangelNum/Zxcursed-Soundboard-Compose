@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.Resource
@@ -55,10 +57,10 @@ fun FavouriteScreen(
     favouriteViewModel: FavouriteViewModel,
     mainViewModel: MainViewModel,
     isPlaying: Boolean,
-    currentDestination: String?,
-    routeOfPlayingSong: String
+    routeOfPlayingSong: String,
+    currentSong: MediaItems,
 ) {
-    val state = favouriteViewModel.favouriteState.collectAsState()
+    val state = favouriteViewModel.favouriteState.collectAsStateWithLifecycle()
 
     when (state.value) {
         is Resource.Loading -> {
@@ -79,8 +81,8 @@ fun FavouriteScreen(
                 favouriteViewModel = favouriteViewModel,
                 mainViewModel = mainViewModel,
                 isPlaying = isPlaying,
-                currentDestination = currentDestination,
-                routeOfPlayingSong = routeOfPlayingSong
+                routeOfPlayingSong = routeOfPlayingSong,
+                currentSong = currentSong
             )
         }
     }
@@ -94,20 +96,37 @@ fun FavouriteItem(
     favouriteViewModel: FavouriteViewModel,
     mainViewModel: MainViewModel,
     isPlaying: Boolean,
-    currentDestination: String?,
-    routeOfPlayingSong: String
+    routeOfPlayingSong: String,
+    currentSong: MediaItems
 ) {
     val currentPosition = mainViewModel.currentPositionIndex.collectAsState()
     val context = LocalContext.current
 
-
     var expandedIndex by remember { mutableStateOf(-1) }
 
+    LaunchedEffect(key1 = items) {
+        if (routeOfPlayingSong == Screens.FavouriteScreen.route) {
+            mainViewModel.updateSongList(items.map { entity ->
+                MediaItems(
+                    author = entity.songAuthor,
+                    name = entity.songName,
+                    image = entity.songImageRes,
+                    audio = entity.songAudioRes
+                )
+            })
+        }
+    }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = if (currentSong.author != "") PaddingValues(
+            top = 16.dp,
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 108.dp
+        ) else PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+
         itemsIndexed(
             items,
             key = { _, mediaItem -> mediaItem.id }) { index, mediaItem ->
@@ -136,6 +155,7 @@ fun FavouriteItem(
                         },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+
                     Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
                         Card(shape = RoundedCornerShape(16.dp), modifier = Modifier.size(64.dp)) {
                             SubcomposeAsyncImage(
@@ -144,10 +164,11 @@ fun FavouriteItem(
                                 modifier = Modifier.size(64.dp),
                                 contentScale = ContentScale.Crop
                             )
+
                         }
                         //not work with standard AnimatedVisibility
                         androidx.compose.animation.AnimatedVisibility(
-                            index == currentPosition.value && isPlaying && routeOfPlayingSong == currentDestination,
+                            index == currentPosition.value && isPlaying && routeOfPlayingSong == Screens.FavouriteScreen.route,
                             enter = fadeIn(),
                             exit = fadeOut()
                         ) {
@@ -167,9 +188,19 @@ fun FavouriteItem(
                         )
                         Text(mediaItem.songAuthor, Modifier.alpha(0.5f))
                     }
-
                     IconButton(onClick = {
                         favouriteViewModel.deleteSong(mediaItem.songName)
+                        mainViewModel.updatePosition(index, Screens.FavouriteScreen.route)
+                        if (index == currentPosition.value) {
+                            mainViewModel.playNextMediaFavourite(items.map { entity ->
+                                MediaItems(
+                                    author = entity.songAuthor,
+                                    name = entity.songName,
+                                    image = entity.songImageRes,
+                                    audio = entity.songAudioRes
+                                )
+                            }, Screens.FavouriteScreen.route, context)
+                        }
                     }) {
                         Icon(
                             modifier = Modifier.size(30.dp),

@@ -49,6 +49,7 @@ import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
+import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
@@ -59,7 +60,8 @@ fun ZxcursedSoundScreen(
     isPlaying: Boolean?,
     favouriteViewModel: FavouriteViewModel,
     currentDestination: String?,
-    routeOfPlayingSong: String
+    routeOfPlayingSong: String,
+    currentSong: MediaItems,
 ) {
     val favouriteState = favouriteViewModel.favouriteState.collectAsStateWithLifecycle()
     val currentPosition = mainViewModel.currentPositionIndex.collectAsStateWithLifecycle()
@@ -130,9 +132,12 @@ fun ZxcursedSoundScreen(
             var expandedIndex by remember { mutableStateOf(-1) }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    16.dp
-                ),
+                contentPadding = if (currentSong.author != "") PaddingValues(
+                    top = 16.dp,
+                    start = 16.dp,
+                    end = 16.dp,
+                    bottom = 108.dp
+                ) else PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 itemsIndexed(mediaItems.value.data!!) { index, item ->
@@ -156,12 +161,12 @@ fun ZxcursedSoundScreen(
                         Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
                             Card(
                                 shape = RoundedCornerShape(16.dp),
-                                modifier = Modifier.size(64.dp)
                             ) {
                                 SubcomposeAsyncImage(
+                                    modifier = Modifier.size(64.dp),
                                     model = item.image,
                                     contentDescription = "photo",
-                                    contentScale = ContentScale.FillWidth,
+                                    contentScale = ContentScale.Crop,
                                 ) {
                                     val state = painter.state
                                     if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {

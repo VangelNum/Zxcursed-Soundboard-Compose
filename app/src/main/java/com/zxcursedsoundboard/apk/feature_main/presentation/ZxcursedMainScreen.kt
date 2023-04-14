@@ -49,6 +49,7 @@ import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
+import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteViewModel
@@ -60,6 +61,7 @@ fun ZxcursedMainScreen(
     favouriteViewModel: FavouriteViewModel,
     currentDestination: String?,
     routeOfPlayingSong: String,
+    currentSong: MediaItems,
 ) {
     val favouriteState = favouriteViewModel.favouriteState.collectAsStateWithLifecycle()
     val currentPosition = mainViewModel.currentPositionIndex.collectAsStateWithLifecycle()
@@ -81,8 +83,7 @@ fun ZxcursedMainScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Card(
-                                modifier = Modifier.size(64.dp),
-                                shape = RoundedCornerShape(16.dp)
+                                modifier = Modifier.size(64.dp), shape = RoundedCornerShape(16.dp)
                             ) {
                                 Box(
                                     modifier = Modifier
@@ -130,9 +131,12 @@ fun ZxcursedMainScreen(
             var expandedIndex by remember { mutableStateOf(-1) }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                   16.dp
-                ),
+                contentPadding = if (currentSong.author != "") PaddingValues(
+                    top = 16.dp,
+                    start = 16.dp,
+                    end = 16.dp,
+                    bottom = 108.dp
+                ) else PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 itemsIndexed(mediaItemsMain.value.data ?: emptyList()) { index, item ->
@@ -150,18 +154,17 @@ fun ZxcursedMainScreen(
                                     songList = mediaItemsMain.value.data!!,
                                     context = context
                                 )
-                            },
-                        verticalAlignment = Alignment.CenterVertically
+                            }, verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
                             Card(
-                                shape = RoundedCornerShape(16.dp),
-                                modifier = Modifier.size(64.dp)
+                                shape = RoundedCornerShape(16.dp)
                             ) {
                                 SubcomposeAsyncImage(
+                                    modifier = Modifier.size(64.dp),
                                     model = item.image,
                                     contentDescription = "photo",
-                                    contentScale = ContentScale.FillWidth,
+                                    contentScale = ContentScale.Crop,
                                 ) {
                                     val state = painter.state
                                     if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {
@@ -198,13 +201,12 @@ fun ZxcursedMainScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = item.name,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                text = item.name, maxLines = 1, overflow = TextOverflow.Ellipsis
                             )
                             Text(text = item.author, Modifier.alpha(0.5f))
                         }
                         val isFavourite = favouriteState.value.data?.toString()?.contains(item.name)
+
                         IconButton(onClick = {
                             val song = FavouriteEntity(
                                 id = 0,
@@ -213,8 +215,10 @@ fun ZxcursedMainScreen(
                                 songImageRes = item.image,
                                 songAudioRes = item.audio
                             )
+
                             if (isFavourite == true) {
                                 favouriteViewModel.deleteSong(item.name)
+
                             } else {
                                 favouriteViewModel.addSong(song)
                             }
@@ -245,12 +249,9 @@ fun ZxcursedMainScreen(
                                 )
                             }
                             if (expandedIndex == index) {
-                                DropdownMenu(
-                                    expanded = true,
-                                    onDismissRequest = { expandedIndex = -1 }
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text(text = stringResource(id = R.string.download)) },
+                                DropdownMenu(expanded = true,
+                                    onDismissRequest = { expandedIndex = -1 }) {
+                                    DropdownMenuItem(text = { Text(text = stringResource(id = R.string.download)) },
                                         onClick = {
                                             mainViewModel.downloadFile(
                                                 url = item.audio,
@@ -263,15 +264,11 @@ fun ZxcursedMainScreen(
                                                 painterResource(id = R.drawable.ic_baseline_download_24),
                                                 contentDescription = null
                                             )
-                                        }
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(text = stringResource(id = R.string.share)) },
+                                        })
+                                    DropdownMenuItem(text = { Text(text = stringResource(id = R.string.share)) },
                                         onClick = {
                                             mainViewModel.share(
-                                                context = context,
-                                                item.audio,
-                                                item.name
+                                                context = context, item.audio, item.name
                                             )
                                         },
                                         leadingIcon = {
@@ -279,8 +276,7 @@ fun ZxcursedMainScreen(
                                                 painterResource(id = R.drawable.ic_baseline_share_24),
                                                 contentDescription = null
                                             )
-                                        }
-                                    )
+                                        })
                                 }
                             }
                         }
