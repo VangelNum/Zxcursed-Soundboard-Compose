@@ -1,4 +1,4 @@
-package com.zxcursedsoundboard.apk.feature_favourite.presentation
+package com.zxcursedsoundboard .apk.feature_favourite.presentation
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -76,14 +77,22 @@ fun FavouriteScreen(
         }
 
         is Resource.Success -> {
-            FavouriteItem(
-                items = state.value.data!!,
-                favouriteViewModel = favouriteViewModel,
-                mainViewModel = mainViewModel,
-                isPlaying = isPlaying,
-                routeOfPlayingSong = routeOfPlayingSong,
-                currentSong = currentSong
-            )
+            if (state.value.data?.isEmpty()==true) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp), contentAlignment = Alignment.Center) {
+                    Text(text = stringResource(id = R.string.empty_favourite))
+                }
+            } else {
+                FavouriteItem(
+                    items = state.value.data!!,
+                    favouriteViewModel = favouriteViewModel,
+                    mainViewModel = mainViewModel,
+                    isPlaying = isPlaying,
+                    routeOfPlayingSong = routeOfPlayingSong,
+                    currentSong = currentSong
+                )
+            }
         }
     }
 }
@@ -192,14 +201,14 @@ fun FavouriteItem(
                         favouriteViewModel.deleteSong(mediaItem.songName)
                         mainViewModel.updatePosition(index, Screens.FavouriteScreen.route)
                         if (index == currentPosition.value) {
-                            mainViewModel.playNextMediaFavourite(items.map { entity ->
+                            mainViewModel.playNextMedia(items.map { entity ->
                                 MediaItems(
                                     author = entity.songAuthor,
                                     name = entity.songName,
                                     image = entity.songImageRes,
                                     audio = entity.songAudioRes
                                 )
-                            }, Screens.FavouriteScreen.route, context)
+                            }, Screens.FavouriteScreen.route, context,true)
                         }
                     }) {
                         Icon(

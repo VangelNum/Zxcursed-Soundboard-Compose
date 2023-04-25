@@ -121,6 +121,10 @@
     <string name="no">Нет</string>
     <string name="yes">Да</string>
     <string name="another_applications">Другие приложения с курседом</string>
+    <string name="empty_favourite">Список избранного пуст</string>
+    <string name="settings">Настройки</string>
+    <string name="choose">Выбрать</string>
+    <string name="choose_apply">Выбрано</string>
 
 
 </resources>

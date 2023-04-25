@@ -2,6 +2,7 @@ package com.zxcursedsoundboard.apk.feature_main.presentation
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -130,7 +131,9 @@ fun ZxcursedMainScreen(
         is ResourceFirebase.Success -> {
             var expandedIndex by remember { mutableStateOf(-1) }
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().background(
+                    Color(0xCB0B283F),
+                ),
                 contentPadding = if (currentSong.author != "") PaddingValues(
                     top = 16.dp,
                     start = 16.dp,
@@ -140,6 +143,7 @@ fun ZxcursedMainScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 itemsIndexed(mediaItemsMain.value.data ?: emptyList()) { index, item ->
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -156,7 +160,10 @@ fun ZxcursedMainScreen(
                                 )
                             }, verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier.size(64.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Card(
                                 shape = RoundedCornerShape(16.dp)
                             ) {
@@ -205,7 +212,8 @@ fun ZxcursedMainScreen(
                             )
                             Text(text = item.author, Modifier.alpha(0.5f))
                         }
-                        val isFavourite = favouriteState.value.data?.toString()?.contains(item.name)
+                        val isFavourite =
+                            favouriteState.value.data?.toString()?.contains(item.name)
 
                         IconButton(onClick = {
                             val song = FavouriteEntity(
@@ -281,9 +289,11 @@ fun ZxcursedMainScreen(
                             }
                         }
                     }
+
                 }
             }
         }
 
     }
+
 }

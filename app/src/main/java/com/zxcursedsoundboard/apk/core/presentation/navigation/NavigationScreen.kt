@@ -36,6 +36,7 @@ import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 
 @Composable
 fun NavigationScreen(navController: NavHostController, currentSong: MediaItems) {
+
     val items = listOf(
         Screens.ZxcursedMainScreen,
         Screens.ZxcursedSoundScreen,
@@ -58,20 +59,20 @@ fun NavigationScreen(navController: NavHostController, currentSong: MediaItems) 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable {
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                     .height(150.dp),
             ) {
                 Card(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clickable {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
                 ) {
                     CoilImage(
                         imageModel = { item.image },
@@ -118,4 +119,8 @@ fun NavigationScreen(navController: NavHostController, currentSong: MediaItems) 
             }
         }
     }
+
+
 }
+
+

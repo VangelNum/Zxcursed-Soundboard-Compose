@@ -16,7 +16,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ZxcursedSoundboardComposeTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
+                Surface(modifier = Modifier
+                    .fillMaxSize()
+                ) {
                     Navigation()
                 }
             }

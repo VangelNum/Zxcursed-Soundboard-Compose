@@ -83,6 +83,7 @@ fun DrawerBody(navController: NavController, drawerState: DrawerState) {
     val items = listOf(
         DrawerItems.Contacts,
         DrawerItems.Share,
+        DrawerItems.Settings,
     )
     val itemsAnotherApplications = listOf(
         DrawerItems.DrumPad,
@@ -250,6 +251,13 @@ fun onEvent(
             intent.data =
                 Uri.parse("https://play.google.com/store/apps/details?id=com.zxcursed.wallpaper")
             context.startActivity(intent)
+        }
+
+        DrawerItems.Settings -> {
+            scope.launch {
+                drawerState.close()
+            }
+            navController.navigate(Screens.SettingsScreen.route)
         }
     }
 }
