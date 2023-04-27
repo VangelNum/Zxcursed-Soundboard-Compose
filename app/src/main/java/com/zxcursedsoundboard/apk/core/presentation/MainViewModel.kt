@@ -1,20 +1,35 @@
 package com.zxcursedsoundboard.apk.core.presentation
 
+import android.annotation.SuppressLint
 import android.app.DownloadManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Environment
+import android.support.v4.media.session.MediaSessionCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
 import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import kotlinx.coroutines.Dispatchers
@@ -137,6 +152,75 @@ class MainViewModel : ViewModel() {
     }
 
     private var player: ExoPlayer? = null
+    private var notificationManager: NotificationManager? = null
+    private var notificationBuilder: NotificationCompat.Builder? = null
+
+    private fun initDeviceNotification(context: Context) {
+        if (notificationManager == null) {
+            notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    "my_channel_id",
+                    "My Channel",
+                    NotificationManager.IMPORTANCE_DEFAULT
+                )
+                notificationManager!!.createNotificationChannel(channel)
+            }
+            val broadcastReceiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    when (intent.action) {
+                        "my_action_play_pause" -> togglePlayback()
+                        "my_action_next" -> playNextMedia(
+                            _songList.value,
+                            _routeOfPlayingSong.value,
+                            context
+                        )
+                    }
+                }
+            }
+            ContextCompat.registerReceiver(context, broadcastReceiver, IntentFilter().apply {
+                addAction("my_action_play_pause")
+                addAction("my_action_next")
+            }, ContextCompat.RECEIVER_EXPORTED)
+        }
+        if (notificationBuilder == null) {
+            val playPauseAction = NotificationCompat.Action(
+                R.drawable.outline_pause_24, "Pause",
+                PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    Intent("my_action_play_pause"),
+                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
+                )
+            )
+            val playbackActionNext = NotificationCompat.Action(
+                R.drawable.baseline_skip_next_24, "Next",
+                PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    Intent("my_action_next"),
+                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
+                )
+            )
+            val mediaSession = MediaSessionCompat(context, "tag")
+            notificationBuilder = NotificationCompat.Builder(context, "my_channel_id")
+                .setSmallIcon(R.drawable.outline_play_arrow_24)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setStyle(
+                    androidx.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(
+                            0,
+                            1,
+                        )
+                        .setMediaSession(mediaSession.sessionToken)
+                )
+                .addAction(playPauseAction)
+                .addAction(playbackActionNext)
+        }
+
+    }
 
     fun setMedia(
         index: Int,
@@ -152,6 +236,27 @@ class MainViewModel : ViewModel() {
         _songList.value = songList
         val mediaItem = MediaItem.fromUri(songRes)
         _currentSong.value = MediaItems(songAuthor, songName, songImage, songRes)
+
+        initDeviceNotification(context)
+        notificationBuilder?.let {
+            it.setContentTitle(_currentSong.value.name)
+            it.setContentText(_currentSong.value.author)
+            Glide.with(context)
+                .asBitmap()
+                .load(_currentSong.value.image)
+                .into(object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(
+                        resource: Bitmap,
+                        transition: Transition<in Bitmap?>?
+                    ) {
+                        notificationBuilder!!.setLargeIcon(resource)
+                    }
+                    override fun onLoadCleared(placeholder: Drawable?) {
+
+                    }
+                })
+        }
+
         if (index == _currentPositionIndex.value && player != null && _routeOfPlayingSong.value == routeOfPlayingSong) {
             togglePlayback()
         } else {
@@ -163,6 +268,7 @@ class MainViewModel : ViewModel() {
                 setMediaItem(mediaItem)
                 prepare()
                 play()
+
                 addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
                         if (state == Player.STATE_READY || state == Player.STATE_BUFFERING) {
@@ -173,6 +279,7 @@ class MainViewModel : ViewModel() {
                                 _currentPositionIndex.value = index
                             }
                             _duration.value = player?.duration ?: 0
+                            notificationManager?.notify(1, notificationBuilder?.build())
                         }
                         if (state == Player.STATE_ENDED) {
                             if (_looping.value) {
@@ -186,12 +293,39 @@ class MainViewModel : ViewModel() {
 
                     override fun onPlayerError(error: PlaybackException) {
                         _isPlaying.value = false
-
                     }
 
                     private var job: Job? = null
 
+                    @SuppressLint("RestrictedApi")
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
+
+                        val playPauseAction = if (isPlaying) {
+                            NotificationCompat.Action(
+                                R.drawable.outline_pause_24, "Pause",
+                                PendingIntent.getBroadcast(
+                                    context,
+                                    0,
+                                    Intent("my_action_play_pause"),
+                                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
+                                )
+                            )
+                        } else {
+                            NotificationCompat.Action(
+                                R.drawable.outline_play_arrow_24, "Play",
+                                PendingIntent.getBroadcast(
+                                    context,
+                                    0,
+                                    Intent("my_action_play_pause"),
+                                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
+                                )
+                            )
+                        }
+                        notificationBuilder?.let {
+                            it.mActions[0] = playPauseAction // update play/pause action
+                            notificationManager?.notify(1, it.build()) // update notification
+                        }
+
                         if (isPlaying) {
                             job = viewModelScope.launch(Dispatchers.Main) {
                                 while (true) {
@@ -212,10 +346,10 @@ class MainViewModel : ViewModel() {
 
 
                 })
-
             }
         }
         _routeOfPlayingSong.value = routeOfPlayingSong
+
     }
 
     fun playNextMedia(
@@ -271,11 +405,11 @@ class MainViewModel : ViewModel() {
     }
 
     private fun togglePlayback() {
-        if (player!!.isPlaying) {
+        if (player?.isPlaying == true) {
             player!!.pause()
             _isPlaying.value = false
         } else {
-            player!!.play()
+            player?.play()
             _isPlaying.value = true
         }
     }
@@ -347,5 +481,75 @@ class MainViewModel : ViewModel() {
         val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
         context.registerReceiver(onCompleteReceiver, filter)
     }
+
+
+    private fun showNotification(context: Context) {
+
+
+//        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            val channel = NotificationChannel(
+//                NOTIFICATION_CHANNEL_ID,
+//                "Current Song",
+//                NotificationManager.IMPORTANCE_LOW
+//            )
+//            notificationManager.createNotificationChannel(channel)
+//        }
+//
+//        val song = currentSong.value
+//        val playbackState = player?.playbackState
+//
+//        //val isPlaying = playbackState != null && playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED && player?.playWhenReady ?: false
+//
+//        val pauseIntent = Intent(context, MainViewModel::class.java).apply {
+//            action = "pause"
+//        }
+//        val pausePendingIntent = PendingIntent.getService(
+//            context,
+//            0,
+//            pauseIntent,
+//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+//        )
+//
+//        val playIntent = Intent(context, MainViewModel::class.java).apply {
+//            action = "play"
+//        }
+//        val playPendingIntent = PendingIntent.getService(
+//            context,
+//            0,
+//            playIntent,
+//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+//        )
+//        val stopIntent = Intent(context, MainViewModel::class.java).apply {
+//            action = "stop"
+//        }
+//        val stopPendingIntent = PendingIntent.getService(
+//            context,
+//            0,
+//            stopIntent,
+//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+//        )
+//        val mediaSession = MediaSessionCompat(context, "your_media_session_tag")
+//        val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+//            .setSmallIcon(R.drawable.outline_play_arrow_24)
+//            .setContentTitle(song.author)
+//            .setContentText(song.name)
+//            .addAction(
+//                if (isPlaying.value) R.drawable.outline_pause_24 else R.drawable.outline_play_arrow_24,
+//                if (isPlaying.value) "Pause" else "Play",
+//                if (isPlaying.value) pausePendingIntent else playPendingIntent
+//            )
+//            .addAction(R.drawable.baseline_stop_24, "Stop", stopPendingIntent)
+//            .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
+//                .setMediaSession(mediaSession.sessionToken)
+//                .setShowActionsInCompactView(0, 1)
+//                .setShowCancelButton(true)
+//                .setCancelButtonIntent(stopPendingIntent)
+//            )
+//
+//        notificationManager.notify(1, notificationBuilder.build())
+    }
+
 
 }

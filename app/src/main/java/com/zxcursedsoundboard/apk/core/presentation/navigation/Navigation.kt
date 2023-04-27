@@ -42,7 +42,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -163,10 +162,10 @@ fun Navigation(
                 modifier = if (currentBackground.value != R.drawable.photo4) with(Modifier) {
                     fillMaxSize()
                         .padding(padding)
-                        .paint(
-                            painterResource(id = currentBackground.value),
-                            contentScale = ContentScale.Crop
-                        )
+//                        .paint(
+//                            //painterResource(id = currentBackground.value),
+//                            //contentScale = ContentScale.Crop
+//                        )
                 } else {
                     Modifier
                         .fillMaxSize()

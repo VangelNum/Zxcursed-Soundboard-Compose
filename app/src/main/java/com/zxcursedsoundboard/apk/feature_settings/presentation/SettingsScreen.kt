@@ -62,13 +62,9 @@ fun SettingsScreen(
     val pagerState = rememberPagerState()
     Column(
         modifier = Modifier.fillMaxSize().padding(if (currentSong.author != "") PaddingValues(
-            top = 16.dp,
-            start = 16.dp,
-            end = 16.dp,
-            bottom = 108.dp
+            bottom = 96.dp
         ) else PaddingValues(0.dp)),
         horizontalAlignment = Alignment.CenterHorizontally
-
     ) {
         HorizontalPager(
             count = backgrounds.size,
