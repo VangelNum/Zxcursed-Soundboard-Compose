@@ -2,7 +2,7 @@ package com.zxcursedsoundboard.apk.core.presentation.navigation
 
 import android.content.Context
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -99,7 +100,7 @@ fun Navigation(
         mutableStateOf(
             sharedPreferences.getInt(
                 "background",
-                R.drawable.photo11
+                0
             )
         )
     }
@@ -159,13 +160,13 @@ fun Navigation(
             AnimatedNavHost(
                 navController,
                 startDestination = startDestination,
-                modifier = if (currentBackground.value != R.drawable.photo4) with(Modifier) {
+                modifier = if (currentBackground.value != 0) with(Modifier) {
                     fillMaxSize()
                         .padding(padding)
-//                        .paint(
-//                            //painterResource(id = currentBackground.value),
-//                            //contentScale = ContentScale.Crop
-//                        )
+                        .paint(
+                            painterResource(id = currentBackground.value),
+                            contentScale = ContentScale.Crop
+                        )
                 } else {
                     Modifier
                         .fillMaxSize()
@@ -176,14 +177,14 @@ fun Navigation(
                     Screens.WatchMediaScreen.route,
                     enterTransition = {
                         slideIntoContainer(
-                            AnimatedContentScope.SlideDirection.Up,
-                            animationSpec = tween(800)
+                            AnimatedContentTransitionScope.SlideDirection.Up,
+                            animationSpec = tween(400)
                         )
                     },
                     exitTransition = {
                         slideOutOfContainer(
-                            AnimatedContentScope.SlideDirection.Down,
-                            animationSpec = tween(800)
+                            AnimatedContentTransitionScope.SlideDirection.Down,
+                            animationSpec = tween(400)
                         )
                     },
                 ) {
@@ -212,8 +213,8 @@ fun Navigation(
 
                             else -> {
                                 slideIntoContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
-                                    animationSpec = tween(700)
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    animationSpec = tween(350)
                                 )
                             }
                         }
@@ -226,8 +227,8 @@ fun Navigation(
 
                             else -> {
                                 slideOutOfContainer(
-                                    AnimatedContentScope.SlideDirection.Right,
-                                    animationSpec = tween(700)
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    animationSpec = tween(350)
                                 )
                             }
                         }
@@ -262,8 +263,8 @@ fun Navigation(
 
                             else -> {
                                 slideIntoContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
-                                    animationSpec = tween(700)
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    animationSpec = tween(350)
                                 )
                             }
                         }
@@ -276,8 +277,8 @@ fun Navigation(
 
                             else -> {
                                 slideOutOfContainer(
-                                    AnimatedContentScope.SlideDirection.Right,
-                                    animationSpec = tween(700)
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    animationSpec = tween(350)
                                 )
                             }
                         }
@@ -316,14 +317,18 @@ fun Navigation(
                     ContactScreen(currentSong = currentSong.value)
                 }
                 composable(Screens.SettingsScreen.route) {
-                    SettingsScreen(currentBackground, sharedPreferences, currentSong = currentSong.value)
+                    SettingsScreen(
+                        currentBackground,
+                        sharedPreferences,
+                        currentSong = currentSong.value
+                    )
                 }
             }
             AnimatedVisibility(
                 currentSong.value.author != "" && currentDestination != Screens.WatchMediaScreen.route,
                 enter = slideInVertically(
                     initialOffsetY = { it },
-                    animationSpec = tween(durationMillis = 400)
+                    animationSpec = tween(durationMillis = 300)
                 ),
                 exit = fadeOut(),
             ) {

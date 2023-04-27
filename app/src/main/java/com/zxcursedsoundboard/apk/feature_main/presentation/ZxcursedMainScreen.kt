@@ -42,9 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
+import coil.compose.AsyncImage
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -143,7 +141,6 @@ fun ZxcursedMainScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 itemsIndexed(mediaItemsMain.value.data ?: emptyList()) { index, item ->
-
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -167,30 +164,12 @@ fun ZxcursedMainScreen(
                             Card(
                                 shape = RoundedCornerShape(16.dp)
                             ) {
-                                SubcomposeAsyncImage(
+                                AsyncImage(
                                     modifier = Modifier.size(64.dp),
                                     model = item.image,
                                     contentDescription = "photo",
                                     contentScale = ContentScale.Crop,
-                                ) {
-                                    val state = painter.state
-                                    if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(64.dp)
-                                                .placeholder(
-                                                    visible = true,
-                                                    color = Color.Gray,
-                                                    highlight = PlaceholderHighlight.shimmer(
-                                                        highlightColor = Color.White,
-                                                    ),
-                                                )
-                                        )
-                                    } else {
-                                        SubcomposeAsyncImageContent()
-                                    }
-
-                                }
+                                )
                             }
                             //not work with standard AnimatedVisibility
                             androidx.compose.animation.AnimatedVisibility(
@@ -212,8 +191,7 @@ fun ZxcursedMainScreen(
                             )
                             Text(text = item.author, Modifier.alpha(0.5f))
                         }
-                        val isFavourite =
-                            favouriteState.value.data?.toString()?.contains(item.name)
+                        val isFavourite = favouriteState.value.data?.toString()?.contains(item.name)
 
                         IconButton(onClick = {
                             val song = FavouriteEntity(

@@ -1,5 +1,6 @@
 package com.zxcursedsoundboard.apk.feature_contacts.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -27,8 +29,10 @@ fun ContactScreen(currentSong: MediaItems, contactViewModel: ContactViewModel = 
     val context = LocalContext.current
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(), contentPadding = if (currentSong.author != "") PaddingValues(
+            modifier = Modifier.fillMaxSize().background(
+                Color(0xCB0B283F),
+            ),
+            contentPadding = if (currentSong.author != "") PaddingValues(
                 top = 16.dp,
                 start = 16.dp,
                 end = 16.dp,

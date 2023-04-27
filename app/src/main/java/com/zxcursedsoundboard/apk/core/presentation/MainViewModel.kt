@@ -162,7 +162,7 @@ class MainViewModel : ViewModel() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val channel = NotificationChannel(
                     "my_channel_id",
-                    "My Channel",
+                    "Music Channel",
                     NotificationManager.IMPORTANCE_DEFAULT
                 )
                 notificationManager!!.createNotificationChannel(channel)
@@ -206,8 +206,9 @@ class MainViewModel : ViewModel() {
             val mediaSession = MediaSessionCompat(context, "tag")
             notificationBuilder = NotificationCompat.Builder(context, "my_channel_id")
                 .setSmallIcon(R.drawable.outline_play_arrow_24)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setSilent(true)
                 .setStyle(
                     androidx.media.app.NotificationCompat.MediaStyle()
                         .setShowActionsInCompactView(
@@ -279,6 +280,7 @@ class MainViewModel : ViewModel() {
                                 _currentPositionIndex.value = index
                             }
                             _duration.value = player?.duration ?: 0
+
                             notificationManager?.notify(1, notificationBuilder?.build())
                         }
                         if (state == Player.STATE_ENDED) {

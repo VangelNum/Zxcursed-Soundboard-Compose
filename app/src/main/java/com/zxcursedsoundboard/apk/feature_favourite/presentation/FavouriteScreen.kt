@@ -1,8 +1,9 @@
-package com.zxcursedsoundboard .apk.feature_favourite.presentation
+package com.zxcursedsoundboard.apk.feature_favourite.presentation
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -77,10 +79,15 @@ fun FavouriteScreen(
         }
 
         is Resource.Success -> {
-            if (state.value.data?.isEmpty()==true) {
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp), contentAlignment = Alignment.Center) {
+            if (state.value.data?.isEmpty() == true) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Color(0xCB0B283F),
+                        )
+                        .padding(16.dp), contentAlignment = Alignment.Center
+                ) {
                     Text(text = stringResource(id = R.string.empty_favourite))
                 }
             } else {
@@ -126,7 +133,11 @@ fun FavouriteItem(
         }
     }
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Color(0xCB0B283F),
+            ),
         contentPadding = if (currentSong.author != "") PaddingValues(
             top = 16.dp,
             start = 16.dp,
@@ -208,7 +219,7 @@ fun FavouriteItem(
                                     image = entity.songImageRes,
                                     audio = entity.songAudioRes
                                 )
-                            }, Screens.FavouriteScreen.route, context,true)
+                            }, Screens.FavouriteScreen.route, context, true)
                         }
                     }) {
                         Icon(

@@ -1,6 +1,7 @@
 package com.zxcursedsoundboard.apk.feature_watch_media.presentation
 
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,130 +71,135 @@ fun WatchMediaScreen(
     LaunchedEffect(key1 = currentSong) {
         isFavourite = favouriteState.value.data?.toString()?.contains(currentSong.name) == true
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        CardItem(
-            image = currentSong.image,
-            mainViewModel = mainViewModel,
-            context = context,
-            audioRes = currentSong.audio,
-            songNameRes = currentSong.name
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        AuthorAndTitleItem(currentSong.name, currentSong.author)
-
-        CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
-            Slider(
-                value = currentTimeMedia.toFloat(),
-                onValueChange = {
-                    mainViewModel.setTimeOfMedia(it.toLong())
-                },
-                valueRange = 0f..duration.toFloat(),
-                modifier = Modifier.fillMaxWidth(1f)
-            )
-        }
-        Row(
+    Box(modifier = Modifier.fillMaxSize().background(
+        Color(0xCB0B283F),
+    )) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 4.dp, end = 4.dp)
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = currentTimeMedia.formatTime(),
-                style = MaterialTheme.typography.titleMedium
+            CardItem(
+                image = currentSong.image,
+                mainViewModel = mainViewModel,
+                context = context,
+                audioRes = currentSong.audio,
+                songNameRes = currentSong.name
             )
-            Spacer(modifier = Modifier.weight(1f))
-            Text(text = duration.formatTime(), style = MaterialTheme.typography.titleMedium)
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = {
-                mainViewModel.toggleLooping()
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.outline_loop_24),
-                    contentDescription = "looping",
-                    modifier = Modifier.size(30.dp),
-                    tint = if (looping) MaterialTheme.colorScheme.primaryContainer else LocalContentColor.current
+            Spacer(modifier = Modifier.height(4.dp))
+            AuthorAndTitleItem(currentSong.name, currentSong.author)
+
+            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                Slider(
+                    value = currentTimeMedia.toFloat(),
+                    onValueChange = {
+                        mainViewModel.setTimeOfMedia(it.toLong())
+                    },
+                    valueRange = 0f..duration.toFloat(),
+                    modifier = Modifier.fillMaxWidth(1f)
                 )
             }
-            IconButton(onClick = {
-                mainViewModel.playPreviousMedia(listOfMedia, routeOfPlayingSong, context)
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_skip_previous_24),
-                    contentDescription = "previous",
-                    modifier = Modifier.size(30.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp, end = 4.dp)
+            ) {
+                Text(
+                    text = currentTimeMedia.formatTime(),
+                    style = MaterialTheme.typography.titleMedium
                 )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = duration.formatTime(), style = MaterialTheme.typography.titleMedium)
             }
-            if (isPlaying) {
-                IconButton(onClick = { mainViewModel.pause() }, modifier = Modifier.size(60.dp)) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_pause_circle_24),
-                        contentDescription = "play/pause",
-                        modifier = Modifier.size(60.dp)
-                    )
-                }
-            } else {
-                IconButton(onClick = { mainViewModel.play() }, modifier = Modifier.size(60.dp)) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_play_circle_24),
-                        contentDescription = "play/pause",
-                        modifier = Modifier.size(60.dp)
-                    )
-                }
-            }
-            IconButton(onClick = {
-                mainViewModel.playNextMedia(listOfMedia, routeOfPlayingSong, context)
-            })
-            {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_skip_next_24),
-                    contentDescription = "next",
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-            if (isFavourite) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 IconButton(onClick = {
-                    favouriteViewModel.deleteSong(currentSong.name)
-                    isFavourite = false
+                    mainViewModel.toggleLooping()
                 }) {
                     Icon(
-                        imageVector = Icons.Outlined.Favorite,
-                        contentDescription = "delete from favourite",
+                        painter = painterResource(id = R.drawable.outline_loop_24),
+                        contentDescription = "looping",
                         modifier = Modifier.size(30.dp),
-                        tint = Color.Red
+                        tint = if (looping) MaterialTheme.colorScheme.primaryContainer else LocalContentColor.current
                     )
                 }
-            } else {
                 IconButton(onClick = {
-                    favouriteViewModel.addSong(
-                        FavouriteEntity(
-                            id = 0,
-                            currentSong.name,
-                            currentSong.author,
-                            currentSong.image,
-                            currentSong.audio
-                        )
-                    )
-                    isFavourite = true
+                    mainViewModel.playPreviousMedia(listOfMedia, routeOfPlayingSong, context)
                 }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.baseline_favorite_border_24),
-                        contentDescription = "add to favourite",
+                        painter = painterResource(id = R.drawable.baseline_skip_previous_24),
+                        contentDescription = "previous",
                         modifier = Modifier.size(30.dp)
                     )
                 }
+                if (isPlaying) {
+                    IconButton(onClick = { mainViewModel.pause() }, modifier = Modifier.size(60.dp)) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_pause_circle_24),
+                            contentDescription = "play/pause",
+                            modifier = Modifier.size(60.dp)
+                        )
+                    }
+                } else {
+                    IconButton(onClick = { mainViewModel.play() }, modifier = Modifier.size(60.dp)) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_play_circle_24),
+                            contentDescription = "play/pause",
+                            modifier = Modifier.size(60.dp)
+                        )
+                    }
+                }
+                IconButton(onClick = {
+                    mainViewModel.playNextMedia(listOfMedia, routeOfPlayingSong, context)
+                })
+                {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_skip_next_24),
+                        contentDescription = "next",
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                if (isFavourite) {
+                    IconButton(onClick = {
+                        favouriteViewModel.deleteSong(currentSong.name)
+                        isFavourite = false
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Favorite,
+                            contentDescription = "delete from favourite",
+                            modifier = Modifier.size(30.dp),
+                            tint = Color.Red
+                        )
+                    }
+                } else {
+                    IconButton(onClick = {
+                        favouriteViewModel.addSong(
+                            FavouriteEntity(
+                                id = 0,
+                                currentSong.name,
+                                currentSong.author,
+                                currentSong.image,
+                                currentSong.audio
+                            )
+                        )
+                        isFavourite = true
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_favorite_border_24),
+                            contentDescription = "add to favourite",
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                }
             }
         }
+
     }
+
 }
 
 @Composable
