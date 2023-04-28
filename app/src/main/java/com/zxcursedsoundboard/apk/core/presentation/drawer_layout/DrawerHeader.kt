@@ -1,9 +1,11 @@
 package com.zxcursedsoundboard.apk.core.presentation.drawer_layout
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,6 +40,7 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.presentation.navigation.Screens
 import kotlinx.coroutines.CoroutineScope
@@ -55,9 +58,11 @@ fun DrawerHeader() {
             }
         }
         .build()
-    Column(modifier = Modifier
-        .background(MaterialTheme.colorScheme.surface)
-        .fillMaxWidth()) {
+    Column(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .fillMaxWidth()
+    ) {
         Image(
             painter = rememberAsyncImagePainter(
                 model = R.drawable.zxcursed,  //second page
@@ -83,6 +88,7 @@ fun DrawerBody(navController: NavController, drawerState: DrawerState) {
     val items = listOf(
         DrawerItems.Contacts,
         DrawerItems.Share,
+        DrawerItems.Estimate,
         DrawerItems.Settings,
     )
     val itemsAnotherApplications = listOf(
@@ -115,7 +121,12 @@ fun DrawerBody(navController: NavController, drawerState: DrawerState) {
             Divider()
             Text(
                 text = stringResource(id = R.string.another_applications),
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 16.dp,
+                    bottom = 8.dp
+                )
             )
         }
         itemsIndexed(itemsAnotherApplications) { index, item ->
@@ -216,9 +227,28 @@ fun onEvent(
     navController: NavController,
     context: Context,
     scope: CoroutineScope,
-    drawerState: DrawerState
+    drawerState: DrawerState,
 ) {
     when (title) {
+        is DrawerItems.Estimate -> {
+            val manager = ReviewManagerFactory.create(context)
+            val request = manager.requestReviewFlow()
+            request.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // We got the ReviewInfo object
+                    val reviewInfo = request.result
+                    val flow = manager.launchReviewFlow(context as Activity, reviewInfo)
+                    flow.addOnCompleteListener { _ ->
+                        // The flow has finished. The API does not indicate whether the user
+                        // reviewed or not, or even whether the review dialog was shown. Thus, no
+                        // matter the result, we continue our app flow.
+                    }
+                } else {
+                    Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         is DrawerItems.Share -> {
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND

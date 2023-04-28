@@ -154,6 +154,7 @@ class MainViewModel : ViewModel() {
     private var player: ExoPlayer? = null
     private var notificationManager: NotificationManager? = null
     private var notificationBuilder: NotificationCompat.Builder? = null
+    private var mediaSession: MediaSessionCompat? = null
 
     private fun initDeviceNotification(context: Context) {
         if (notificationManager == null) {
@@ -203,7 +204,7 @@ class MainViewModel : ViewModel() {
                     PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
                 )
             )
-            val mediaSession = MediaSessionCompat(context, "tag")
+            mediaSession = MediaSessionCompat(context, "tag")
             notificationBuilder = NotificationCompat.Builder(context, "my_channel_id")
                 .setSmallIcon(R.drawable.outline_play_arrow_24)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -215,7 +216,7 @@ class MainViewModel : ViewModel() {
                             0,
                             1,
                         )
-                        .setMediaSession(mediaSession.sessionToken)
+                        .setMediaSession(mediaSession!!.sessionToken)
                 )
                 .addAction(playPauseAction)
                 .addAction(playbackActionNext)
@@ -440,7 +441,11 @@ class MainViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
+        mediaSession?.release()
+        mediaSession = null
+        notificationManager?.cancelAll()
         player?.release()
+        player = null
     }
 
     fun downloadFile(url: String, fileName: String, context: Context) {

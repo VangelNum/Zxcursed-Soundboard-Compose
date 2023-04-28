@@ -4,9 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'com.google.dagger.hilt.android'
     id 'com.google.gms.google-services'
-
 }
-
 
 android {
     compileSdk 33
@@ -96,8 +94,6 @@ dependencies {
     implementation 'androidx.hilt:hilt-navigation-compose:1.1.0-alpha01'
 
 
-    //media in notification area
-    implementation 'androidx.media:media:1.6.0'
 
     //shimmer
     implementation "com.google.accompanist:accompanist-placeholder:0.29.1-alpha"
@@ -105,7 +101,6 @@ dependencies {
     //exoplayer
     implementation 'com.google.android.exoplayer:exoplayer-core:2.18.6'
     implementation 'com.google.android.exoplayer:extension-mediasession:2.18.6'
-    implementation 'com.google.android.exoplayer:exoplayer-ui:2.18.6'
 
     //blur
     implementation "com.github.skydoves:landscapist-transformation:2.1.10"
@@ -119,6 +114,10 @@ dependencies {
     //glide
     implementation 'com.github.bumptech.glide:glide:4.14.2'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+
+    //rate application
+    implementation 'com.google.android.play:core:1.10.3'
+    implementation 'com.google.android.play:core-ktx:1.8.1'
 
 
 }

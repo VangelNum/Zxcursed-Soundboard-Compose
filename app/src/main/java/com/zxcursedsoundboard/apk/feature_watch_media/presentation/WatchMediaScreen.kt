@@ -2,6 +2,7 @@ package com.zxcursedsoundboard.apk.feature_watch_media.presentation
 
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,12 +38,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.data.model.MediaItems
@@ -61,19 +65,41 @@ fun WatchMediaScreen(
     currentSong: MediaItems,
     listOfMedia: List<MediaItems>,
     favouriteViewModel: FavouriteViewModel,
-    routeOfPlayingSong: String
+    routeOfPlayingSong: String,
+    navController: NavController
 ) {
     val context = LocalContext.current
     val favouriteState = favouriteViewModel.favouriteState.collectAsState()
     var isFavourite by remember {
         mutableStateOf(false)
     }
+    var scrollState by remember { mutableStateOf(Offset(0F, 0F)) }
+    var differenceScroll by remember { mutableStateOf(Offset(0F, 0F)) }
     LaunchedEffect(key1 = currentSong) {
         isFavourite = favouriteState.value.data?.toString()?.contains(currentSong.name) == true
     }
-    Box(modifier = Modifier.fillMaxSize().background(
-        Color(0xCB0B283F),
-    )) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Color(0xCB0B283F),
+            )
+            .pointerInput(Unit) {
+                detectVerticalDragGestures(
+                    onDragStart = { touch ->
+                        scrollState = touch
+                    },
+                    onVerticalDrag = { change, dragAmount ->
+                        differenceScroll = change.position
+                    },
+                    onDragEnd = {
+                        if (scrollState.y - differenceScroll.y < -300F) {
+                            navController.popBackStack()
+                        }
+                    }
+                )
+            }
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -137,7 +163,10 @@ fun WatchMediaScreen(
                     )
                 }
                 if (isPlaying) {
-                    IconButton(onClick = { mainViewModel.pause() }, modifier = Modifier.size(60.dp)) {
+                    IconButton(
+                        onClick = { mainViewModel.pause() },
+                        modifier = Modifier.size(60.dp)
+                    ) {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_pause_circle_24),
                             contentDescription = "play/pause",
@@ -145,7 +174,10 @@ fun WatchMediaScreen(
                         )
                     }
                 } else {
-                    IconButton(onClick = { mainViewModel.play() }, modifier = Modifier.size(60.dp)) {
+                    IconButton(
+                        onClick = { mainViewModel.play() },
+                        modifier = Modifier.size(60.dp)
+                    ) {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_play_circle_24),
                             contentDescription = "play/pause",

@@ -105,6 +105,7 @@ fun Navigation(
         )
     }
 
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -197,7 +198,8 @@ fun Navigation(
                         currentSong = currentSong.value,
                         listOfMedia = listOfMedia.value,
                         favouriteViewModel = favouriteViewModel,
-                        routeOfPlayingSong = routeOfPlayingSong.value
+                        routeOfPlayingSong = routeOfPlayingSong.value,
+                        navController = navController
                     )
                 }
                 composable(
@@ -244,7 +246,37 @@ fun Navigation(
                     )
 
                 }
-                composable(Screens.FavouriteScreen.route) {
+                composable(
+                    Screens.FavouriteScreen.route,
+                    enterTransition = {
+                        when (initialState.destination.route) {
+                            Screens.WatchMediaScreen.route -> {
+                                null
+                            }
+
+                            else -> {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    animationSpec = tween(350)
+                                )
+                            }
+                        }
+                    },
+                    exitTransition = {
+                        when (targetState.destination.route) {
+                            Screens.WatchMediaScreen.route -> {
+                                null
+                            }
+
+                            else -> {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    animationSpec = tween(350)
+                                )
+                            }
+                        }
+                    },
+                ) {
                     FavouriteScreen(
                         favouriteViewModel,
                         mainViewModel,
@@ -293,7 +325,37 @@ fun Navigation(
                         currentSong = currentSong.value
                     )
                 }
-                composable(Screens.SnailScreen.route) {
+                composable(
+                    Screens.SnailScreen.route,
+                    enterTransition = {
+                        when (initialState.destination.route) {
+                            Screens.WatchMediaScreen.route -> {
+                                null
+                            }
+
+                            else -> {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    animationSpec = tween(350)
+                                )
+                            }
+                        }
+                    },
+                    exitTransition = {
+                        when (targetState.destination.route) {
+                            Screens.WatchMediaScreen.route -> {
+                                null
+                            }
+
+                            else -> {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    animationSpec = tween(350)
+                                )
+                            }
+                        }
+                    },
+                ) {
                     SnailScreen(
                         mainViewModel = mainViewModel,
                         isPlaying = isPlaying.value,
@@ -303,7 +365,37 @@ fun Navigation(
                         currentSong = currentSong.value
                     )
                 }
-                composable(Screens.AlwaysWannaFlyScreen.route) {
+                composable(
+                    Screens.AlwaysWannaFlyScreen.route,
+                    enterTransition = {
+                        when (initialState.destination.route) {
+                            Screens.WatchMediaScreen.route -> {
+                                null
+                            }
+
+                            else -> {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    animationSpec = tween(350)
+                                )
+                            }
+                        }
+                    },
+                    exitTransition = {
+                        when (targetState.destination.route) {
+                            Screens.WatchMediaScreen.route -> {
+                                null
+                            }
+
+                            else -> {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    animationSpec = tween(350)
+                                )
+                            }
+                        }
+                    },
+                ) {
                     AlwaysWannaFlyScreen(
                         mainViewModel = mainViewModel,
                         isPlaying = isPlaying.value,
