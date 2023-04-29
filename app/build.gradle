@@ -63,6 +63,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
     // Collect States
     implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.6.1'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.1.2'
     // UI Tests
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.4.2'
 
@@ -92,8 +93,6 @@ dependencies {
     kapt "com.google.dagger:hilt-android-compiler:2.44"
     kapt "androidx.hilt:hilt-compiler:1.0.0"
     implementation 'androidx.hilt:hilt-navigation-compose:1.1.0-alpha01'
-
-
 
     //shimmer
     implementation "com.google.accompanist:accompanist-placeholder:0.29.1-alpha"
