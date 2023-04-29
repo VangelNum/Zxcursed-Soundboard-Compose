@@ -16,4 +16,8 @@ sealed class Screens(
     object WatchMediaScreen : Screens("media_watch_route", R.string.watch_audio, R.drawable.photo11)
     object ContactScreen: Screens("contact_route",R.string.contacts,R.drawable.photo11)
     object SettingsScreen: Screens("settings_route",R.string.settings,R.drawable.photo11)
+
+    object AdditionallyScreen : Screens("additionally_route",R.string.additionally,R.drawable.photo11)
+    object CatScreen: Screens("cat_route",R.string.cat,R.drawable.photo11)
+    object ZxcursedBack: Screens("zxcursed_back",R.string.zxcursed_in_back,R.drawable.photo11)
 }

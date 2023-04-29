@@ -129,9 +129,11 @@ fun ZxcursedMainScreen(
         is ResourceFirebase.Success -> {
             var expandedIndex by remember { mutableStateOf(-1) }
             LazyColumn(
-                modifier = Modifier.fillMaxSize().background(
-                    Color(0xCB0B283F),
-                ),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Color(0xCB0B283F),
+                    ),
                 contentPadding = if (currentSong.author != "") PaddingValues(
                     top = 16.dp,
                     start = 16.dp,

@@ -48,7 +48,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -60,6 +59,9 @@ import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.core.presentation.drawer_layout.DrawerBody
 import com.zxcursedsoundboard.apk.core.presentation.drawer_layout.DrawerHeader
+import com.zxcursedsoundboard.apk.feature_additionally.AdditionallyScreen
+import com.zxcursedsoundboard.apk.feature_additionally.CatScreen
+import com.zxcursedsoundboard.apk.feature_additionally.ZxcursedBackScreen
 import com.zxcursedsoundboard.apk.feature_alwayswannafly.presentation.AlwaysWannaFlyScreen
 import com.zxcursedsoundboard.apk.feature_contacts.presentation.ContactScreen
 import com.zxcursedsoundboard.apk.feature_favourite.presentation.FavouriteScreen
@@ -76,8 +78,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun Navigation(
     startDestination: String = Screens.NavigationScreen.route,
-    favouriteViewModel: FavouriteViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel = hiltViewModel()
+    favouriteViewModel: FavouriteViewModel,
+    mainViewModel: MainViewModel
 ) {
     val navController: NavHostController = rememberAnimatedNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -415,6 +417,20 @@ fun Navigation(
                         currentSong = currentSong.value
                     )
                 }
+                composable(Screens.AdditionallyScreen.route) {
+                    AdditionallyScreen({
+                        navController.navigate(Screens.CatScreen.route)
+                        mainViewModel.closeNotification()
+                    }, { navController.navigate(Screens.ZxcursedBack.route)
+                        mainViewModel.closeNotification()})
+                }
+                composable(Screens.CatScreen.route) {
+                    CatScreen()
+                }
+                composable(Screens.ZxcursedBack.route) {
+                    ZxcursedBackScreen()
+                }
+
             }
             AnimatedVisibility(
                 currentSong.value.author != "" && currentDestination != Screens.WatchMediaScreen.route,

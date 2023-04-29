@@ -90,10 +90,11 @@ fun DrawerBody(navController: NavController, drawerState: DrawerState) {
         DrawerItems.Share,
         DrawerItems.Estimate,
         DrawerItems.Settings,
+        DrawerItems.Additionally
     )
     val itemsAnotherApplications = listOf(
-        DrawerItems.DrumPad,
-        DrawerItems.Wallpaper
+        DrawerItemsAnotherApplications.DrumPad,
+        DrawerItemsAnotherApplications.Wallpaper
     )
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -108,11 +109,11 @@ fun DrawerBody(navController: NavController, drawerState: DrawerState) {
             ListItem(modifier = Modifier.clickable {
                 onEvent(item, navController, context, scope, drawerState)
             }, headlineContent = {
-                Text(text = item.title)
+                Text(text = stringResource(id = item.title))
             }, leadingContent = {
                 Icon(
                     painter = painterResource(id = item.imageRes),
-                    contentDescription = item.title,
+                    contentDescription = stringResource(id = item.title),
                     modifier = Modifier.size(24.dp)
                 )
             })
@@ -221,6 +222,26 @@ fun AlertDialogZxcursedWallpaper(openDialog: MutableState<Boolean>, context: Con
     }
 }
 
+fun onEventAnotherApplications(
+    title: DrawerItemsAnotherApplications,
+    context: Context,
+) {
+    when (title) {
+        is DrawerItemsAnotherApplications.DrumPad -> {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data =
+                Uri.parse("https://play.google.com/store/apps/details?id=com.vangelnum.drumpad")
+            context.startActivity(intent)
+        }
+        is DrawerItemsAnotherApplications.Wallpaper -> {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data =
+                Uri.parse("https://play.google.com/store/apps/details?id=com.zxcursed.wallpaper")
+            context.startActivity(intent)
+        }
+    }
+}
+
 
 fun onEvent(
     title: DrawerItems,
@@ -230,6 +251,13 @@ fun onEvent(
     drawerState: DrawerState,
 ) {
     when (title) {
+        is DrawerItems.Additionally -> {
+            scope.launch {
+                drawerState.close()
+            }
+            navController.navigate(Screens.AdditionallyScreen.route)
+        }
+
         is DrawerItems.Estimate -> {
             val manager = ReviewManagerFactory.create(context)
             val request = manager.requestReviewFlow()
@@ -244,7 +272,7 @@ fun onEvent(
                         // matter the result, we continue our app flow.
                     }
                 } else {
-                    Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -262,12 +290,7 @@ fun onEvent(
             context.startActivity(Intent.createChooser(sendIntent, "Share..."))
         }
 
-        is DrawerItems.DrumPad -> {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data =
-                Uri.parse("https://play.google.com/store/apps/details?id=com.vangelnum.drumpad")
-            context.startActivity(intent)
-        }
+
 
         is DrawerItems.Contacts -> {
             scope.launch {
@@ -276,12 +299,6 @@ fun onEvent(
             navController.navigate(Screens.ContactScreen.route)
         }
 
-        is DrawerItems.Wallpaper -> {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data =
-                Uri.parse("https://play.google.com/store/apps/details?id=com.zxcursed.wallpaper")
-            context.startActivity(intent)
-        }
 
         DrawerItems.Settings -> {
             scope.launch {

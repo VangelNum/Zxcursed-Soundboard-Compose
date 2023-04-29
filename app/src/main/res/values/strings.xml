@@ -125,6 +125,12 @@
     <string name="settings">Настройки</string>
     <string name="choose">Выбрать</string>
     <string name="choose_apply">Выбрано</string>
+    <string name="cat">Котик</string>
+    <string name="zxcursed_in_back">Прошлое курседа</string>
+    <string name="additionally">Дополнительно</string>
+    <string name="rate">Оценить</string>
+    <string name="zxcursed_wallpaper">Zxcursed Wallpaper</string>
+    <string name="zxcursed_drumpad">Zxcursed DrumPad</string>
 
 
 </resources>

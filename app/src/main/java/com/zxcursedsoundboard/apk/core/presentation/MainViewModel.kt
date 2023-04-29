@@ -10,8 +10,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Environment
 import android.support.v4.media.session.MediaSessionCompat
@@ -20,9 +19,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackException
@@ -155,7 +151,7 @@ class MainViewModel : ViewModel() {
     private var notificationManager: NotificationManager? = null
     private var notificationBuilder: NotificationCompat.Builder? = null
     private var mediaSession: MediaSessionCompat? = null
-
+    private var broadcastReceiver: BroadcastReceiver? = null
     private fun initDeviceNotification(context: Context) {
         if (notificationManager == null) {
             notificationManager =
@@ -168,7 +164,7 @@ class MainViewModel : ViewModel() {
                 )
                 notificationManager!!.createNotificationChannel(channel)
             }
-            val broadcastReceiver = object : BroadcastReceiver() {
+            broadcastReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
                     when (intent.action) {
                         "my_action_play_pause" -> togglePlayback()
@@ -177,12 +173,22 @@ class MainViewModel : ViewModel() {
                             _routeOfPlayingSong.value,
                             context
                         )
+
+                        "my_action_previous" -> playPreviousMedia(
+                            _songList.value,
+                            _routeOfPlayingSong.value,
+                            context
+                        )
+
+                        "my_action_close" -> closeNotification()
                     }
                 }
             }
             ContextCompat.registerReceiver(context, broadcastReceiver, IntentFilter().apply {
+                addAction("my_action_previous")
                 addAction("my_action_play_pause")
                 addAction("my_action_next")
+                addAction("my_action_close")
             }, ContextCompat.RECEIVER_EXPORTED)
         }
         if (notificationBuilder == null) {
@@ -195,6 +201,15 @@ class MainViewModel : ViewModel() {
                     PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
                 )
             )
+            val closeAction = NotificationCompat.Action(
+                R.drawable.outline_close_24, "Close",
+                PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    Intent("my_action_close"),
+                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
+                )
+            )
             val playbackActionNext = NotificationCompat.Action(
                 R.drawable.baseline_skip_next_24, "Next",
                 PendingIntent.getBroadcast(
@@ -204,10 +219,19 @@ class MainViewModel : ViewModel() {
                     PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
                 )
             )
+            val playbackActionPreview = NotificationCompat.Action(
+                R.drawable.baseline_skip_previous_24, "Previous",
+                PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    Intent("my_action_previous"),
+                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
+                )
+            )
             mediaSession = MediaSessionCompat(context, "tag")
             notificationBuilder = NotificationCompat.Builder(context, "my_channel_id")
                 .setSmallIcon(R.drawable.outline_play_arrow_24)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSilent(true)
                 .setStyle(
@@ -215,13 +239,15 @@ class MainViewModel : ViewModel() {
                         .setShowActionsInCompactView(
                             0,
                             1,
+                            2
                         )
                         .setMediaSession(mediaSession!!.sessionToken)
                 )
+                .addAction(playbackActionPreview)
                 .addAction(playPauseAction)
                 .addAction(playbackActionNext)
+                .addAction(closeAction)
         }
-
     }
 
     fun setMedia(
@@ -243,20 +269,7 @@ class MainViewModel : ViewModel() {
         notificationBuilder?.let {
             it.setContentTitle(_currentSong.value.name)
             it.setContentText(_currentSong.value.author)
-            Glide.with(context)
-                .asBitmap()
-                .load(_currentSong.value.image)
-                .into(object : CustomTarget<Bitmap>() {
-                    override fun onResourceReady(
-                        resource: Bitmap,
-                        transition: Transition<in Bitmap?>?
-                    ) {
-                        notificationBuilder!!.setLargeIcon(resource)
-                    }
-                    override fun onLoadCleared(placeholder: Drawable?) {
-
-                    }
-                })
+            it.setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.nenado))
         }
 
         if (index == _currentPositionIndex.value && player != null && _routeOfPlayingSong.value == routeOfPlayingSong) {
@@ -325,7 +338,7 @@ class MainViewModel : ViewModel() {
                             )
                         }
                         notificationBuilder?.let {
-                            it.mActions[0] = playPauseAction // update play/pause action
+                            it.mActions[1] = playPauseAction // update play/pause action
                             notificationManager?.notify(1, it.build()) // update notification
                         }
 
@@ -439,13 +452,22 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
+    fun closeNotification() {
+        _currentSong.value.author = ""
         mediaSession?.release()
         mediaSession = null
         notificationManager?.cancelAll()
         player?.release()
         player = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        notificationManager?.cancelAll()
+        notificationManager = null
+        mediaSession?.release()
+        mediaSession = null
+        notificationBuilder = null
     }
 
     fun downloadFile(url: String, fileName: String, context: Context) {
@@ -488,75 +510,5 @@ class MainViewModel : ViewModel() {
         val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
         context.registerReceiver(onCompleteReceiver, filter)
     }
-
-
-    private fun showNotification(context: Context) {
-
-
-//        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-//
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            val channel = NotificationChannel(
-//                NOTIFICATION_CHANNEL_ID,
-//                "Current Song",
-//                NotificationManager.IMPORTANCE_LOW
-//            )
-//            notificationManager.createNotificationChannel(channel)
-//        }
-//
-//        val song = currentSong.value
-//        val playbackState = player?.playbackState
-//
-//        //val isPlaying = playbackState != null && playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED && player?.playWhenReady ?: false
-//
-//        val pauseIntent = Intent(context, MainViewModel::class.java).apply {
-//            action = "pause"
-//        }
-//        val pausePendingIntent = PendingIntent.getService(
-//            context,
-//            0,
-//            pauseIntent,
-//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//        )
-//
-//        val playIntent = Intent(context, MainViewModel::class.java).apply {
-//            action = "play"
-//        }
-//        val playPendingIntent = PendingIntent.getService(
-//            context,
-//            0,
-//            playIntent,
-//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//        )
-//        val stopIntent = Intent(context, MainViewModel::class.java).apply {
-//            action = "stop"
-//        }
-//        val stopPendingIntent = PendingIntent.getService(
-//            context,
-//            0,
-//            stopIntent,
-//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//        )
-//        val mediaSession = MediaSessionCompat(context, "your_media_session_tag")
-//        val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-//            .setSmallIcon(R.drawable.outline_play_arrow_24)
-//            .setContentTitle(song.author)
-//            .setContentText(song.name)
-//            .addAction(
-//                if (isPlaying.value) R.drawable.outline_pause_24 else R.drawable.outline_play_arrow_24,
-//                if (isPlaying.value) "Pause" else "Play",
-//                if (isPlaying.value) pausePendingIntent else playPendingIntent
-//            )
-//            .addAction(R.drawable.baseline_stop_24, "Stop", stopPendingIntent)
-//            .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
-//                .setMediaSession(mediaSession.sessionToken)
-//                .setShowActionsInCompactView(0, 1)
-//                .setShowCancelButton(true)
-//                .setCancelButtonIntent(stopPendingIntent)
-//            )
-//
-//        notificationManager.notify(1, notificationBuilder.build())
-    }
-
 
 }
