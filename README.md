@@ -1,10 +1,13 @@
 # Zxcursed-Soundboard-Compose
-Simple Soundboard build with jetpack compose, mediaplayer
 
+SoundBoard with exoplayer, firebase, hilt-dagger, clean architecture, mvvm, room, coil, jetpack compose, coroutines, animated navigation, shimmer effect, pager
+
+Link to google play:
 https://play.google.com/store/apps/details?id=com.zxcursedsoundboard.apk&hl=ru&gl=US
 
-![image](https://user-images.githubusercontent.com/91003195/191219141-03ec9f64-5c34-4b74-a9e4-9f0eaf276325.png)
-![image](https://user-images.githubusercontent.com/91003195/191219162-751935c0-e83e-4f31-bb2f-439197d68846.png)
-![image](https://user-images.githubusercontent.com/91003195/191219169-93857e7c-2037-4bd7-a0d4-a9805ffb810b.png)
-![image](https://user-images.githubusercontent.com/91003195/191219189-f464777f-f931-4536-97de-95dc97fbd483.png)
-![image](https://user-images.githubusercontent.com/91003195/191219199-6606aa7e-2046-4a26-808a-ade3ce456632.png)
+![image](https://user-images.githubusercontent.com/91003195/236264042-9bfb0e6f-8fd2-4c98-9b5b-a791d23b36cd.png)
+![image](https://user-images.githubusercontent.com/91003195/236264092-d3b94ed9-dd83-4527-9cc1-c207b611297e.png)
+![image](https://user-images.githubusercontent.com/91003195/236264122-f16f989c-a2b6-4222-9940-05c86199ce37.png)
+![image](https://user-images.githubusercontent.com/91003195/236264159-8ad38caf-6fd5-42bf-940d-5fa7911cc041.png)
+![image](https://user-images.githubusercontent.com/91003195/236264193-6ee1d494-acbe-4f36-85bc-65560e8ae165.png)
+
