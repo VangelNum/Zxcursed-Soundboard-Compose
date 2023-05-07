@@ -23,11 +23,15 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.zxcursedsoundboard.apk.MainActivity
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
 import com.zxcursedsoundboard.apk.core.data.model.MediaItems
+import com.zxcursedsoundboard.apk.feature_alwayswannafly.domain.FlyRepository
+import com.zxcursedsoundboard.apk.feature_main.domain.ZxcursedMainRepository
+import com.zxcursedsoundboard.apk.feature_snail.domain.SnailRepository
+import com.zxcursedsoundboard.apk.feature_sounds_zxcursed.domain.ZxcursedSoundsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -38,10 +42,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-
-class MainViewModel : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val snailRepository: SnailRepository,
+    private val flyRepository: FlyRepository,
+    private val zxcursedMainRepository: ZxcursedMainRepository,
+    private val zxcursedSoundsRepository: ZxcursedSoundsRepository
+) : ViewModel() {
 
     private val _currentPositionIndex = MutableStateFlow(-1)
     val currentPositionIndex: StateFlow<Int> = _currentPositionIndex.asStateFlow()
@@ -85,67 +94,38 @@ class MainViewModel : ViewModel() {
 
     fun getSoundsZxcursed() {
         viewModelScope.launch {
-            _soundsZxcursed.value = ResourceFirebase.Loading()
-            try {
-                val db = Firebase.firestore
-                val query = db.collection("audioSound").get().await()
-                val items = query.documents.mapNotNull {
-                    it.toObject(MediaItems::class.java)
-                }
-                _soundsZxcursed.value = ResourceFirebase.Success(items)
-            } catch (e: Exception) {
-                _soundsZxcursed.value = ResourceFirebase.Error(e.message.toString())
-            }
-        }
-    }
-
-    fun getFlySounds() {
-        viewModelScope.launch {
-            _soundsFly.value = ResourceFirebase.Loading()
-            try {
-                val db = Firebase.firestore
-                val query = db.collection("audioFly").get().await()
-                val items = query.documents.mapNotNull {
-                    it.toObject(MediaItems::class.java)
-                }
-                _soundsFly.value = ResourceFirebase.Success(items)
-            } catch (e: Exception) {
-                _soundsFly.value = ResourceFirebase.Error(e.message.toString())
-            }
-        }
-    }
-
-    fun getSnailSounds() {
-        viewModelScope.launch {
-            _soundsSnail.value = ResourceFirebase.Loading()
-            try {
-                val db = Firebase.firestore
-                val query = db.collection("audioUlitka").get().await()
-                val items = query.documents.mapNotNull {
-                    it.toObject(MediaItems::class.java)
-                }
-                _soundsSnail.value = ResourceFirebase.Success(items)
-            } catch (e: Exception) {
-                _soundsSnail.value = ResourceFirebase.Error(e.message.toString())
+            zxcursedSoundsRepository.getZxcursedSounds().collect {
+                _soundsZxcursed.value = it
             }
         }
     }
 
     fun getAudioMain() {
         viewModelScope.launch {
-            _songMain.value = ResourceFirebase.Loading()
-            try {
-                val db = Firebase.firestore
-                val query = db.collection("audio").get().await()
-                val items = query.documents.mapNotNull {
-                    it.toObject(MediaItems::class.java)
-                }
-                _songMain.value = ResourceFirebase.Success(items)
-            } catch (e: Exception) {
-                _songMain.value = ResourceFirebase.Error(e.message.toString())
+            zxcursedMainRepository.getZxcursedMain().collect {
+                _songMain.value = it
             }
         }
     }
+
+    fun getFlySounds() {
+        viewModelScope.launch {
+            viewModelScope.launch {
+                flyRepository.getFlySounds().collect {
+                    _soundsFly.value = it
+                }
+            }
+        }
+    }
+
+    fun getSnailSounds() {
+        viewModelScope.launch {
+            snailRepository.getSnailSounds().collect {
+                _soundsSnail.value = it
+            }
+        }
+    }
+
 
     private var player: ExoPlayer? = null
     private var notificationManager: NotificationManager? = null
@@ -229,8 +209,11 @@ class MainViewModel : ViewModel() {
                 )
             )
             mediaSession = MediaSessionCompat(context, "tag")
+            val notificationIntent = Intent(context, MainActivity::class.java)
+            val intent = PendingIntent.getActivity(context, 0, notificationIntent, FLAG_IMMUTABLE)
             notificationBuilder = NotificationCompat.Builder(context, "my_channel_id")
                 .setSmallIcon(R.drawable.outline_play_arrow_24)
+                .setContentIntent(intent)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSilent(true)

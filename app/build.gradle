@@ -67,8 +67,15 @@ dependencies {
     // UI Tests
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.4.2'
 
-    //firebase
-    implementation 'com.google.firebase:firebase-firestore-ktx:24.5.0'
+    //firebase firestore
+    implementation platform('com.google.firebase:firebase-bom:29.0.1')
+    implementation 'com.google.firebase:firebase-firestore-ktx'
+    implementation 'com.google.firebase:firebase-firestore'
+    //firebase analytics
+    implementation 'com.google.firebase:firebase-analytics:21.2.2'
+    //firebase notifications
+    implementation 'com.google.firebase:firebase-messaging'
+
     //coil image
     implementation("io.coil-kt:coil-compose:2.2.2")
     //coil gif
@@ -111,9 +118,6 @@ dependencies {
     //util
     implementation "androidx.compose.ui:ui-util:$compose_version"
 
-    //rate application
-    implementation 'com.google.android.play:core:1.10.3'
-    implementation 'com.google.android.play:core-ktx:1.8.1'
 
 
 }

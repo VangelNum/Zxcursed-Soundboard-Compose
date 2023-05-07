@@ -1,11 +1,9 @@
 package com.zxcursedsoundboard.apk.core.presentation.drawer_layout
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,11 +38,11 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-import com.google.android.play.core.review.ReviewManagerFactory
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.presentation.navigation.Screens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun DrawerHeader() {
@@ -105,7 +103,7 @@ fun DrawerBody(navController: NavController, drawerState: DrawerState) {
     AlertDialogZxcursedDrumPad(openDialogDrumPad, context)
 
     LazyColumn {
-        itemsIndexed(items) { index, item ->
+        itemsIndexed(items) { _, item ->
             ListItem(modifier = Modifier.clickable {
                 onEvent(item, navController, context, scope, drawerState)
             }, headlineContent = {
@@ -233,6 +231,7 @@ fun onEventAnotherApplications(
                 Uri.parse("https://play.google.com/store/apps/details?id=com.vangelnum.drumpad")
             context.startActivity(intent)
         }
+
         is DrawerItemsAnotherApplications.Wallpaper -> {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data =
@@ -259,22 +258,32 @@ fun onEvent(
         }
 
         is DrawerItems.Estimate -> {
-            val manager = ReviewManagerFactory.create(context)
-            val request = manager.requestReviewFlow()
-            request.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // We got the ReviewInfo object
-                    val reviewInfo = request.result
-                    val flow = manager.launchReviewFlow(context as Activity, reviewInfo)
-                    flow.addOnCompleteListener { _ ->
-                        // The flow has finished. The API does not indicate whether the user
-                        // reviewed or not, or even whether the review dialog was shown. Thus, no
-                        // matter the result, we continue our app flow.
-                    }
-                } else {
-                    Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
-                }
-            }
+
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data =
+                Uri.parse("https://play.google.com/store/apps/details?id=com.zxcursedsoundboard.apk")
+            context.startActivity(intent)
+
+
+            //old Version of rate app
+
+//            val manager = ReviewManagerFactory.create(context.applicationContext)
+//            val request = manager.requestReviewFlow()
+//            request.addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    // We got the ReviewInfo object
+//                    val reviewInfo = request.result
+//                    val flow = manager.launchReviewFlow(context.applicationContext as Activity, reviewInfo)
+//                    flow.addOnCompleteListener { _ ->
+//                        Log.d("tag","success")
+//                    }
+//                    flow.addOnFailureListener {
+//                        Log.d("tag","exception: ${it.message.toString()}")
+//                    }
+//                } else {
+//                    Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
+//                }
+//            }
         }
 
         is DrawerItems.Share -> {
@@ -289,7 +298,6 @@ fun onEvent(
             }
             context.startActivity(Intent.createChooser(sendIntent, "Share..."))
         }
-
 
 
         is DrawerItems.Contacts -> {

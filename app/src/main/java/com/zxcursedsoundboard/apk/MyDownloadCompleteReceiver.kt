@@ -1,4 +1,4 @@
-package com.zxcursedsoundboard.apk.core.presentation
+package com.zxcursedsoundboard.apk
 
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
