@@ -14,8 +14,8 @@ android {
         applicationId "com.zxcursedsoundboard.apk"
         minSdk 23
         targetSdk 36
-        versionCode 18
-        versionName "2.2"
+        versionCode 32
+        versionName "3.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
