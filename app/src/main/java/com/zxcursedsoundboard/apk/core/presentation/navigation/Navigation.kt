@@ -1,5 +1,6 @@
 package com.zxcursedsoundboard.apk.core.presentation.navigation
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -19,7 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,11 +51,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.presentation.MainViewModel
 import com.zxcursedsoundboard.apk.core.presentation.drawer_layout.DrawerBody
@@ -74,6 +75,7 @@ import com.zxcursedsoundboard.apk.feature_watch_media.presentation.WatchMediaScr
 import kotlinx.coroutines.launch
 
 
+@SuppressLint("UnsafeOptInUsageError")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun Navigation(
@@ -81,7 +83,7 @@ fun Navigation(
     favouriteViewModel: FavouriteViewModel,
     mainViewModel: MainViewModel
 ) {
-    val navController: NavHostController = rememberAnimatedNavController()
+    val navController: NavHostController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination?.route
 
@@ -150,7 +152,7 @@ fun Navigation(
                             }
                         }) {
                             Icon(
-                                imageVector = Icons.Outlined.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                                 contentDescription = "menu"
                             )
                         }
@@ -160,7 +162,7 @@ fun Navigation(
 
             ) { padding ->
 
-            AnimatedNavHost(
+            NavHost(
                 navController,
                 startDestination = startDestination,
                 modifier = if (currentBackground.value != 0) with(Modifier) {
@@ -421,8 +423,10 @@ fun Navigation(
                     AdditionallyScreen({
                         navController.navigate(Screens.CatScreen.route)
                         mainViewModel.closeNotification()
-                    }, { navController.navigate(Screens.ZxcursedBack.route)
-                        mainViewModel.closeNotification()})
+                    }, {
+                        navController.navigate(Screens.ZxcursedBack.route)
+                        mainViewModel.closeNotification()
+                    })
                 }
                 composable(Screens.CatScreen.route) {
                     CatScreen()
@@ -513,6 +517,4 @@ fun Navigation(
             }
         }
     }
-
 }
-

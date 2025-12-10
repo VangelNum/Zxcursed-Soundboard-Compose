@@ -1,7 +1,6 @@
 package com.zxcursedsoundboard.apk.feature_sounds_zxcursed.presentation
 
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,9 +43,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
 import com.zxcursedsoundboard.apk.core.data.model.MediaItems
@@ -88,26 +85,15 @@ fun ZxcursedSoundScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .placeholder(
-                                            visible = true,
-                                            color = Color.Gray,
-                                            highlight = PlaceholderHighlight.shimmer(
-                                                highlightColor = Color.White,
-                                            ),
-                                        )
+                                        .background(Color.Gray)
                                 )
                             }
                             Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                                text = "content", modifier = Modifier
+                            Box(
+                                modifier = Modifier
                                     .fillMaxWidth()
-                                    .placeholder(
-                                        visible = true,
-                                        color = Color.Gray,
-                                        highlight = PlaceholderHighlight.shimmer(
-                                            highlightColor = Color.White,
-                                        ),
-                                    )
+                                    .height(20.dp)
+                                    .background(Color.Gray, RoundedCornerShape(4.dp))
                             )
                         }
                     }
@@ -130,9 +116,11 @@ fun ZxcursedSoundScreen(
         is ResourceFirebase.Success -> {
             var expandedIndex by remember { mutableStateOf(-1) }
             LazyColumn(
-                modifier = Modifier.fillMaxSize().background(
-                    Color(0xCB0B283F),
-                ),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Color(0xCB0B283F),
+                    ),
                 contentPadding = if (currentSong.author != "") PaddingValues(
                     top = 16.dp,
                     start = 16.dp,
@@ -170,18 +158,18 @@ fun ZxcursedSoundScreen(
                                     contentScale = ContentScale.Crop,
                                 )
                             }
-                            //not work with standard AnimatedVisibility
-                            androidx.compose.animation.AnimatedVisibility(
-                                index == currentPosition.value && isPlaying == true && routeOfPlayingSong == currentDestination,
-                                enter = fadeIn(),
-                                exit = fadeOut()
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.outline_pause_24),
-                                    contentDescription = "Play/Pause",
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
+                            val alpha by animateFloatAsState(
+                                targetValue = if (index == currentPosition.value && isPlaying == true && routeOfPlayingSong == currentDestination) 1f else 0f,
+                                label = "playPauseIconAlpha"
+                            )
+                            Icon(
+                                painter = painterResource(R.drawable.outline_pause_24),
+                                contentDescription = "Play/Pause",
+                                tint = Color.White,
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .alpha(alpha)
+                            )
                         }
                         Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
@@ -277,6 +265,5 @@ fun ZxcursedSoundScreen(
                 }
             }
         }
-
     }
 }

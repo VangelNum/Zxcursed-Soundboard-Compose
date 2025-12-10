@@ -2,28 +2,25 @@ package com.zxcursedsoundboard.apk.core.presentation
 
 import android.annotation.SuppressLint
 import android.app.DownloadManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.BroadcastReceiver
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import android.graphics.BitmapFactory
-import android.os.Build
 import android.os.Environment
-import android.support.v4.media.session.MediaSessionCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
+import androidx.annotation.OptIn
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.PlaybackException
-import com.google.android.exoplayer2.Player
-import com.zxcursedsoundboard.apk.MainActivity
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.session.MediaSession
+import androidx.media3.ui.PlayerNotificationManager
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
 import com.zxcursedsoundboard.apk.core.data.model.MediaItems
@@ -42,6 +39,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.net.URL
 import javax.inject.Inject
 
 @HiltViewModel
@@ -49,7 +50,8 @@ class MainViewModel @Inject constructor(
     private val snailRepository: SnailRepository,
     private val flyRepository: FlyRepository,
     private val zxcursedMainRepository: ZxcursedMainRepository,
-    private val zxcursedSoundsRepository: ZxcursedSoundsRepository
+    private val zxcursedSoundsRepository: ZxcursedSoundsRepository,
+    @SuppressLint("UnsafeOptInUsageError") private val cacheDataSourceFactory: CacheDataSource.Factory
 ) : ViewModel() {
 
     private val _currentPositionIndex = MutableStateFlow(-1)
@@ -92,6 +94,8 @@ class MainViewModel @Inject constructor(
         MutableStateFlow<ResourceFirebase<List<MediaItems>>>(ResourceFirebase.Empty())
     val soundsFly = _soundsFly.asStateFlow()
 
+    private var positionUpdateJob: Job? = null
+
     fun getSoundsZxcursed() {
         viewModelScope.launch {
             zxcursedSoundsRepository.getZxcursedSounds().collect {
@@ -110,10 +114,8 @@ class MainViewModel @Inject constructor(
 
     fun getFlySounds() {
         viewModelScope.launch {
-            viewModelScope.launch {
-                flyRepository.getFlySounds().collect {
-                    _soundsFly.value = it
-                }
+            flyRepository.getFlySounds().collect {
+                _soundsFly.value = it
             }
         }
     }
@@ -128,109 +130,36 @@ class MainViewModel @Inject constructor(
 
 
     private var player: ExoPlayer? = null
-    private var notificationManager: NotificationManager? = null
-    private var notificationBuilder: NotificationCompat.Builder? = null
-    private var mediaSession: MediaSessionCompat? = null
+
+    @UnstableApi
+    private var notificationManager: PlayerNotificationManager? = null
+    private var mediaSession: MediaSession? = null
     private var broadcastReceiver: BroadcastReceiver? = null
+
+    @OptIn(UnstableApi::class)
     private fun initDeviceNotification(context: Context) {
-        if (notificationManager == null) {
-            notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    "my_channel_id",
-                    "Music Channel",
-                    NotificationManager.IMPORTANCE_DEFAULT
-                )
-                notificationManager!!.createNotificationChannel(channel)
-            }
-            broadcastReceiver = object : BroadcastReceiver() {
-                override fun onReceive(context: Context, intent: Intent) {
-                    when (intent.action) {
-                        "my_action_play_pause" -> togglePlayback()
-                        "my_action_next" -> playNextMedia(
-                            _songList.value,
-                            _routeOfPlayingSong.value,
-                            context
-                        )
-
-                        "my_action_previous" -> playPreviousMedia(
-                            _songList.value,
-                            _routeOfPlayingSong.value,
-                            context
-                        )
-
-                        "my_action_close" -> closeNotification()
-                    }
+        if (mediaSession == null) {
+            mediaSession = MediaSession.Builder(context, player!!).build()
+        }
+        notificationManager = PlayerNotificationManager.Builder(
+            context,
+            1,
+            "my_channel_id"
+        )
+            .setChannelNameResourceId(R.string.app_name)
+            .setChannelDescriptionResourceId(R.string.app_name)
+            .setNotificationListener(object : PlayerNotificationManager.NotificationListener {
+                override fun onNotificationPosted(
+                    notificationId: Int,
+                    notification: android.app.Notification,
+                    ongoing: Boolean
+                ) {
+                    super.onNotificationPosted(notificationId, notification, ongoing)
                 }
-            }
-            ContextCompat.registerReceiver(context, broadcastReceiver, IntentFilter().apply {
-                addAction("my_action_previous")
-                addAction("my_action_play_pause")
-                addAction("my_action_next")
-                addAction("my_action_close")
-            }, ContextCompat.RECEIVER_EXPORTED)
-        }
-        if (notificationBuilder == null) {
-            val playPauseAction = NotificationCompat.Action(
-                R.drawable.outline_pause_24, "Pause",
-                PendingIntent.getBroadcast(
-                    context,
-                    0,
-                    Intent("my_action_play_pause"),
-                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
-                )
-            )
-            val closeAction = NotificationCompat.Action(
-                R.drawable.outline_close_24, "Close",
-                PendingIntent.getBroadcast(
-                    context,
-                    0,
-                    Intent("my_action_close"),
-                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
-                )
-            )
-            val playbackActionNext = NotificationCompat.Action(
-                R.drawable.baseline_skip_next_24, "Next",
-                PendingIntent.getBroadcast(
-                    context,
-                    0,
-                    Intent("my_action_next"),
-                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
-                )
-            )
-            val playbackActionPreview = NotificationCompat.Action(
-                R.drawable.baseline_skip_previous_24, "Previous",
-                PendingIntent.getBroadcast(
-                    context,
-                    0,
-                    Intent("my_action_previous"),
-                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
-                )
-            )
-            mediaSession = MediaSessionCompat(context, "tag")
-            val notificationIntent = Intent(context, MainActivity::class.java)
-            val intent = PendingIntent.getActivity(context, 0, notificationIntent, FLAG_IMMUTABLE)
-            notificationBuilder = NotificationCompat.Builder(context, "my_channel_id")
-                .setSmallIcon(R.drawable.outline_play_arrow_24)
-                .setContentIntent(intent)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSilent(true)
-                .setStyle(
-                    androidx.media.app.NotificationCompat.MediaStyle()
-                        .setShowActionsInCompactView(
-                            0,
-                            1,
-                            2
-                        )
-                        .setMediaSession(mediaSession!!.sessionToken)
-                )
-                .addAction(playbackActionPreview)
-                .addAction(playPauseAction)
-                .addAction(playbackActionNext)
-                .addAction(closeAction)
-        }
+            })
+            .build()
+        notificationManager?.setPlayer(player)
+        notificationManager?.setMediaSessionToken(mediaSession!!.platformToken)
     }
 
     fun setMedia(
@@ -248,12 +177,6 @@ class MainViewModel @Inject constructor(
         val mediaItem = MediaItem.fromUri(songRes)
         _currentSong.value = MediaItems(songAuthor, songName, songImage, songRes)
 
-        initDeviceNotification(context)
-        notificationBuilder?.let {
-            it.setContentTitle(_currentSong.value.name)
-            it.setContentText(_currentSong.value.author)
-            it.setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.nenado))
-        }
 
         if (index == _currentPositionIndex.value && player != null && _routeOfPlayingSong.value == routeOfPlayingSong) {
             togglePlayback()
@@ -262,23 +185,27 @@ class MainViewModel @Inject constructor(
                 it.stop()
                 it.release()
             }
-            player = ExoPlayer.Builder(context).build().apply {
+            stopPositionUpdates()
+            player = ExoPlayer.Builder(context)
+                .setMediaSourceFactory(
+                    DefaultMediaSourceFactory(context).setDataSourceFactory(cacheDataSourceFactory)
+                )
+                .build()
+                .apply {
                 setMediaItem(mediaItem)
                 prepare()
                 play()
 
                 addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
-                        if (state == Player.STATE_READY || state == Player.STATE_BUFFERING) {
-                            _isPlaying.value = true
+                        if (state == Player.STATE_READY) { // STATE_BUFFERING можно убрать, чтобы isPlaying не был true во время буферизации
+                            _isPlaying.value = player?.isPlaying ?: false
                             if (fromFavourite == true) {
                                 _currentPositionIndex.value = index - 1
                             } else {
                                 _currentPositionIndex.value = index
                             }
                             _duration.value = player?.duration ?: 0
-
-                            notificationManager?.notify(1, notificationBuilder?.build())
                         }
                         if (state == Player.STATE_ENDED) {
                             if (_looping.value) {
@@ -292,63 +219,39 @@ class MainViewModel @Inject constructor(
 
                     override fun onPlayerError(error: PlaybackException) {
                         _isPlaying.value = false
+                        stopPositionUpdates()
                     }
-
-                    private var job: Job? = null
 
                     @SuppressLint("RestrictedApi")
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
-
-                        val playPauseAction = if (isPlaying) {
-                            NotificationCompat.Action(
-                                R.drawable.outline_pause_24, "Pause",
-                                PendingIntent.getBroadcast(
-                                    context,
-                                    0,
-                                    Intent("my_action_play_pause"),
-                                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
-                                )
-                            )
-                        } else {
-                            NotificationCompat.Action(
-                                R.drawable.outline_play_arrow_24, "Play",
-                                PendingIntent.getBroadcast(
-                                    context,
-                                    0,
-                                    Intent("my_action_play_pause"),
-                                    PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE
-                                )
-                            )
-                        }
-                        notificationBuilder?.let {
-                            it.mActions[1] = playPauseAction // update play/pause action
-                            notificationManager?.notify(1, it.build()) // update notification
-                        }
-
+                        _isPlaying.value = isPlaying
                         if (isPlaying) {
-                            job = viewModelScope.launch(Dispatchers.Main) {
-                                while (true) {
-                                    val currentPosition = player?.currentPosition ?: 0
-                                    _currentTimeMedia.emit(currentPosition)
-                                    delay(16)
-                                    if (player?.isPlaying == false) {
-                                        job?.cancel()
-                                        job = null
-                                    }
-                                }
-                            }
+                            startPositionUpdates()
                         } else {
-                            job?.cancel()
-                            job = null
+                            stopPositionUpdates()
                         }
                     }
-
-
                 })
             }
         }
+        initDeviceNotification(context)
         _routeOfPlayingSong.value = routeOfPlayingSong
+    }
 
+    private fun startPositionUpdates() {
+        stopPositionUpdates() // На всякий случай останавливаем предыдущую задачу
+        positionUpdateJob = viewModelScope.launch {
+            while (true) {
+                val currentPosition = player?.currentPosition ?: 0
+                _currentTimeMedia.emit(currentPosition)
+                delay(250) // Обновляем 4 раза в секунду, этого достаточно для UI
+            }
+        }
+    }
+
+    private fun stopPositionUpdates() {
+        positionUpdateJob?.cancel()
+        positionUpdateJob = null
     }
 
     fun playNextMedia(
@@ -400,7 +303,6 @@ class MainViewModel @Inject constructor(
 
     fun setTimeOfMedia(position: Long) {
         player?.seekTo(position)
-        player?.play()
     }
 
     private fun togglePlayback() {
@@ -435,22 +337,25 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    @UnstableApi
     fun closeNotification() {
         _currentSong.value.author = ""
         mediaSession?.release()
         mediaSession = null
-        notificationManager?.cancelAll()
+        notificationManager?.setPlayer(null)
         player?.release()
         player = null
     }
 
+    @UnstableApi
     override fun onCleared() {
         super.onCleared()
-        notificationManager?.cancelAll()
-        notificationManager = null
+        stopPositionUpdates()
         mediaSession?.release()
         mediaSession = null
-        notificationBuilder = null
+        notificationManager?.setPlayer(null)
+        player?.release()
+        player = null
     }
 
     fun downloadFile(url: String, fileName: String, context: Context) {
@@ -463,35 +368,63 @@ class MainViewModel @Inject constructor(
         downloadManager.enqueue(request)
     }
 
-    private var onCompleteReceiver: BroadcastReceiver? = null
 
     fun share(context: Context, audioUrl: String, fileName: String) {
-        onCompleteReceiver?.let {
-            context.unregisterReceiver(it)
-        }
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val safeFileName = "${fileName.replace("[^a-zA-Z0-9а-яА-Я .]".toRegex(), "_")}.mp3"
+                val file = File(context.cacheDir, safeFileName)
 
-        val downloadManager = context.getSystemService(DownloadManager::class.java)
-        val request = DownloadManager.Request(audioUrl.toUri())
-            .setMimeType("audio/mp3")
-            .setTitle("$fileName.mp3")
-            .setDescription("Downloading $fileName")
+                val url = URL(audioUrl)
+                val connection = url.openConnection()
+                connection.connect()
 
-        val downloadId = downloadManager.enqueue(request)
+                val inputStream = connection.getInputStream()
+                val outputStream = FileOutputStream(file)
 
-        onCompleteReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val fileUri = downloadManager.getUriForDownloadedFile(downloadId)
-                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "audio/mp3"
-                    putExtra(Intent.EXTRA_STREAM, fileUri)
+                val buffer = ByteArray(1024)
+                var len: Int
+                while (inputStream.read(buffer).also { len = it } > 0) {
+                    outputStream.write(buffer, 0, len)
                 }
-                context?.startActivity(Intent.createChooser(shareIntent, "Share MP3"))
-                context?.unregisterReceiver(this)
-                onCompleteReceiver = null
+                outputStream.close()
+                inputStream.close()
+
+                withContext(Dispatchers.Main) {
+                    shareFileUsingProvider(context, file)
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
-        val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        context.registerReceiver(onCompleteReceiver, filter)
     }
 
+    private fun shareFileUsingProvider(context: Context, file: File) {
+        try {
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "audio/mpeg"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                clipData = ClipData.newRawUri(null, uri)
+
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            val chooser = Intent.createChooser(intent, "Поделиться звуком")
+
+            chooser.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            context.startActivity(chooser)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }

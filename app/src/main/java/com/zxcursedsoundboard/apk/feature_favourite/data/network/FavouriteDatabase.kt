@@ -4,7 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.zxcursedsoundboard.apk.feature_favourite.data.model.FavouriteEntity
 
-@Database(entities = [FavouriteEntity::class], version = 10)
+@Database(entities = [FavouriteEntity::class], version = 10, exportSchema = false)
 abstract class FavouriteDatabase: RoomDatabase() {
     abstract fun getDao(): FavouriteDao
 }

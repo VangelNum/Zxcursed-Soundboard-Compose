@@ -1,7 +1,6 @@
 package com.zxcursedsoundboard.apk.feature_snail.data
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObjects
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
 import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.feature_snail.domain.SnailRepository
@@ -16,7 +15,7 @@ class SnailRepositoryImpl @Inject constructor(
     override fun getSnailSounds(): Flow<ResourceFirebase<List<MediaItems>>> = flow {
         emit(ResourceFirebase.Loading())
         try {
-            val items = bdFirebase.collection("audioUlitka").get().await().toObjects<MediaItems>()
+            val items = bdFirebase.collection("audioUlitka").get().await().toObjects(MediaItems::class.java)
             if (items.isNotEmpty()) {
                 emit(ResourceFirebase.Success(items))
             } else {

@@ -1,7 +1,6 @@
 package com.zxcursedsoundboard.apk.feature_alwayswannafly.data
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObjects
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
 import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.feature_alwayswannafly.domain.FlyRepository
@@ -16,7 +15,7 @@ class FlyRepositoryImpl @Inject constructor(
     override fun getFlySounds(): Flow<ResourceFirebase<List<MediaItems>>> = flow {
         emit(ResourceFirebase.Loading())
         try {
-            val items = bdFirebase.collection("audioFly").get().await().toObjects<MediaItems>()
+            val items = bdFirebase.collection("audioFly").get().await().toObjects(MediaItems::class.java)
             if (items.isNotEmpty()) {
                 emit(ResourceFirebase.Success(items))
             } else {

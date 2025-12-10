@@ -28,7 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,9 +43,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import com.zxcursedsoundboard.apk.R
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
 import com.zxcursedsoundboard.apk.core.data.model.MediaItems
@@ -88,26 +85,20 @@ fun SnailScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .placeholder(
-                                            visible = true,
-                                            color = Color.Gray,
-                                            highlight = PlaceholderHighlight.shimmer(
-                                                highlightColor = Color.White,
-                                            ),
-                                        )
+//                                        .placeholder(
+//                                            visible = true,
+//                                            color = Color.Gray,
+//                                        )
                                 )
                             }
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
                                 text = "content", modifier = Modifier
                                     .fillMaxWidth()
-                                    .placeholder(
-                                        visible = true,
-                                        color = Color.Gray,
-                                        highlight = PlaceholderHighlight.shimmer(
-                                            highlightColor = Color.White,
-                                        ),
-                                    )
+//                                    .placeholder(
+//                                        visible = true,
+//                                        color = Color.Gray,
+//                                    )
                             )
                         }
                     }
@@ -128,7 +119,7 @@ fun SnailScreen(
         }
 
         is ResourceFirebase.Success -> {
-            var expandedIndex by remember { mutableStateOf(-1) }
+            var expandedIndex by remember { mutableIntStateOf(-1) }
             LazyColumn(
                 modifier = Modifier.fillMaxSize().background(
                     Color(0xCB0B283F),

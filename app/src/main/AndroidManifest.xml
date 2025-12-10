@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.STORAGE" />
 
     <application
-        android:name=".MyApp"
+        android:name=".App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -49,7 +49,7 @@
                 android:resource="@xml/provider_paths" />
         </provider>
         <receiver
-            android:name=".MyDownloadCompleteReceiver"
+            android:name=".DownloadReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -57,7 +57,7 @@
             </intent-filter>
         </receiver>
         <service
-            android:name=".MyFirstbaseMessagingService"
+            android:name=".FirebaseMessagingService"
             android:exported="false"
             android:directBootAware="true">
             <intent-filter>

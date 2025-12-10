@@ -68,6 +68,16 @@ fun WatchMediaScreen(
     routeOfPlayingSong: String,
     navController: NavController
 ) {
+
+    var sliderPosition by remember { mutableStateOf(0f) }
+    var isSeeking by remember { mutableStateOf(false) }
+
+    LaunchedEffect(currentTimeMedia) {
+        if (!isSeeking) {
+            sliderPosition = currentTimeMedia.toFloat()
+        }
+    }
+
     val context = LocalContext.current
     val favouriteState = favouriteViewModel.favouriteState.collectAsState()
     var isFavourite by remember {
@@ -118,9 +128,14 @@ fun WatchMediaScreen(
 
             CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
                 Slider(
-                    value = currentTimeMedia.toFloat(),
-                    onValueChange = {
-                        mainViewModel.setTimeOfMedia(it.toLong())
+                    value = sliderPosition,
+                    onValueChange = { newPosition ->
+                        isSeeking = true
+                        sliderPosition = newPosition
+                    },
+                    onValueChangeFinished = {
+                        mainViewModel.setTimeOfMedia(sliderPosition.toLong())
+                        isSeeking = false
                     },
                     valueRange = 0f..duration.toFloat(),
                     modifier = Modifier.fillMaxWidth(1f)
@@ -132,7 +147,7 @@ fun WatchMediaScreen(
                     .padding(start = 4.dp, end = 4.dp)
             ) {
                 Text(
-                    text = currentTimeMedia.formatTime(),
+                    text = if(isSeeking) sliderPosition.toLong().formatTime() else currentTimeMedia.formatTime(),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.weight(1f))

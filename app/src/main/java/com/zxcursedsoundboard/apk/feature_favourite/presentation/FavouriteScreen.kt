@@ -150,7 +150,7 @@ fun FavouriteItem(
         itemsIndexed(
             items,
             key = { _, mediaItem -> mediaItem.id }) { index, mediaItem ->
-            Box(modifier = Modifier.animateItemPlacement()) {
+            Box(modifier = Modifier.animateItem()) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

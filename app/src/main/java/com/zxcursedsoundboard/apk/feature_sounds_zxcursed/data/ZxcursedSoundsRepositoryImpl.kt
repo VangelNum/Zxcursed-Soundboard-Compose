@@ -1,7 +1,6 @@
 package com.zxcursedsoundboard.apk.feature_sounds_zxcursed.data
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObjects
 import com.zxcursedsoundboard.apk.core.common.ResourceFirebase
 import com.zxcursedsoundboard.apk.core.data.model.MediaItems
 import com.zxcursedsoundboard.apk.feature_sounds_zxcursed.domain.ZxcursedSoundsRepository
@@ -16,7 +15,7 @@ class ZxcursedSoundsRepositoryImpl @Inject constructor(
     override fun getZxcursedSounds(): Flow<ResourceFirebase<List<MediaItems>>> = flow {
         emit(ResourceFirebase.Loading())
         try {
-            val items = bdFirebase.collection("audioSound").get().await().toObjects<MediaItems>()
+            val items = bdFirebase.collection("audioSound").get().await().toObjects(MediaItems::class.java)
             if (items.isNotEmpty()) {
                 emit(ResourceFirebase.Success(items))
             } else {

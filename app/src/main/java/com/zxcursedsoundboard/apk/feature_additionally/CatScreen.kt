@@ -9,13 +9,15 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
-import com.google.android.exoplayer2.ui.StyledPlayerView
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import com.zxcursedsoundboard.apk.R
 
 
+@UnstableApi
 @Composable
 fun CatScreen() {
     val context = LocalContext.current
@@ -23,7 +25,7 @@ fun CatScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
             factory = { context ->
-                StyledPlayerView(context).apply {
+                PlayerView(context).apply {
                     resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
                     player = exoPlayer
                     layoutParams = FrameLayout.LayoutParams(

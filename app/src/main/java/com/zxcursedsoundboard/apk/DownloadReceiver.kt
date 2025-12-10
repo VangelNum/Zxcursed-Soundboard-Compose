@@ -5,7 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 
-class MyDownloadCompleteReceiver : BroadcastReceiver() {
+class DownloadReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action == DownloadManager.ACTION_DOWNLOAD_COMPLETE) {
             // Handle the download complete event
